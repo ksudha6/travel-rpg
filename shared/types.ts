@@ -37,6 +37,8 @@ export interface Competitor {
   whatTheyDo: string;
   model: string; // e.g., "Boutique", "Supermarket", "Catalog"
   gap: string;
+  indiaContext: string; // India-market relevance and positioning
+  strategy: string; // "compete" | "collaborate" | "cannibalize" | "ignore"
   phases: TravelPhase[]; // which phases they're active in
   logo?: string; // path to icon
 }
@@ -57,12 +59,15 @@ export interface JourneyPhase {
   id: TravelPhase;
   title: string;
   emoji: string;
+  sceneTagline: string; // dramatic one-liner shown full-screen at scene start
   standardFocus: string; // what normal apps do
   offbeatHook: string; // the unique angle
-  hookName: string; // e.g., "The Vibe Check"
+  hookName: string; // e.g., "The Visa Reality Check"
   hookQuote: string; // the one-liner pitch
+  personaAnxieties: Record<PersonaId, string>; // per-persona fear at this phase
   competitors: Competitor[];
   atlysPlay: string;
+  gtmPlay: string; // GTM motion specific to this phase
   additionalHooks?: Array<{
     name: string;
     quote: string;
