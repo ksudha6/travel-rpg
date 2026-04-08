@@ -2,6 +2,7 @@ import { MarketSegment } from '../../../shared/types';
 
 export const TAM = {
   current: '$220B',
+  currentINR: '₹18,00,000 crore',
   currentYear: 2024,
   projected: '$470B+',
   projectedYear: 2030,

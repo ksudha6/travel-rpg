@@ -65,13 +65,10 @@ export interface JourneyPhase {
   hookName: string; // e.g., "The Visa Reality Check"
   hookQuote: string; // the one-liner pitch
   personaAnxieties: Record<PersonaId, string>; // per-persona fear at this phase
-  competitors: Competitor[];
+  competitorNames: string[]; // competitor names active in this phase
   atlysPlay: string;
   gtmPlay: string; // GTM motion specific to this phase
-  additionalHooks?: Array<{
-    name: string;
-    quote: string;
-  }>;
+  additionalHooks?: string[];
 }
 
 // ─── Strategy ───────────────────────────────────────────────

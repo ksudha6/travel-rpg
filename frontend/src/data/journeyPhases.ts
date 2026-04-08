@@ -1,4 +1,4 @@
-import { TravelPhase, PersonaId } from '../../../shared/types';
+import { TravelPhase, PersonaId, JourneyPhase } from '../../../shared/types';
 
 // ─── RESEARCH NOTES ───────────────────────────────────────────────────────────
 // Competitor lists per phase are India-market accurate as of April 2026.
@@ -8,23 +8,7 @@ import { TravelPhase, PersonaId } from '../../../shared/types';
 // VFS Global and iVisa added — they are Atlys's actual visa competitors.
 // ──────────────────────────────────────────────────────────────────────────────
 
-export interface JourneyPhaseData {
-  id: TravelPhase;
-  title: string;
-  emoji: string;
-  sceneTagline: string;
-  standardFocus: string;
-  offbeatHook: string;
-  hookName: string;
-  hookQuote: string;
-  atlysPlay: string;
-  personaAnxieties: Record<PersonaId, string>;
-  competitorNames: string[];
-  gtmPlay: string;
-  additionalHooks?: string[];
-}
-
-export const JOURNEY_PHASES: JourneyPhaseData[] = [
+export const JOURNEY_PHASES: JourneyPhase[] = [
   {
     id: TravelPhase.DREAMING,
     title: 'Dreaming',
