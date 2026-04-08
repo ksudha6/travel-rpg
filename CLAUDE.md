@@ -56,14 +56,27 @@ This project is governed by a bounded context model to keep iteration scope smal
 3. **All commits to `main` must contain working code.** No broken builds on main. Ever.
 4. **Content authoring is human work, not agent work.** The agent handles structure, plumbing, rendering. The human provides domain-accurate text, copy, and creative decisions.
 5. **Research and implementation are separate iterations.** Never mix "figure out how" and "build it" in the same iteration.
+6. **No TODOs. No placeholders.** Every file committed must be complete. No `// TODO`, no `placeholder`, no stub functions that do nothing. If it's not ready, it doesn't go in.
 
 ### Starting an Iteration
 
-1. Create `work-log/<iteration-NNN>/` directory
-2. Create `iteration-NNN.md` with this template:
+**Directory structure (mandatory):**
+```
+work-log/
+  <YYYY-MM-DD>/          ← date folder (day iteration starts)
+    iteration-NN/         ← iteration folder lives INSIDE the date folder
+      iteration-NN.md     ← iteration log file
+```
+Example: `work-log/2026-04-08/iteration-01/iteration-01.md`
+
+**Steps:**
+1. Find the latest iteration number by scanning `work-log/*/iteration-*/`. Increment by 1.
+2. Create the date folder if it doesn't exist: `work-log/<YYYY-MM-DD>/`
+3. Create the iteration folder inside it: `work-log/<YYYY-MM-DD>/iteration-NN/`
+4. Create `iteration-NN.md` inside that folder with this template:
 
 ```markdown
-# Iteration NNN
+# Iteration NN
 **Date started:** YYYY-MM-DD
 **Bounded context:** [which context this touches]
 **Status:** in-progress | completed | carried-forward
@@ -100,10 +113,11 @@ This project is governed by a bounded context model to keep iteration scope smal
 ```
 
 ### Iteration Nomenclature
-- Format: `iteration-NNN` where NNN is a global counter (001, 002, 003...)
-- The counter NEVER resets. Iteration 001 is always the first iteration of the project.
-- Each iteration's folder is `work-log/iteration-NNN/`
-- If an iteration spans multiple days, it keeps its original number.
+- Format: `iteration-NN` where NN is a global counter (01, 02, 03...)
+- The counter NEVER resets. Iteration 01 is always the first iteration of the project.
+- Each iteration's folder is `work-log/<YYYY-MM-DD>/iteration-NN/` where the date is the day the iteration started.
+- Multiple iterations on the same day share the same date folder.
+- If an iteration spans multiple days, it keeps its original start date and number.
 - New iterations always increment by 1 from the previous, regardless of date.
 
 ### Closing an Iteration
@@ -117,7 +131,7 @@ Before marking complete, verify ALL of the following:
 7. Code is committed to main with a descriptive message
 
 ### Retrospectives
-Every 10 iterations (010, 020, 030...), review patterns in:
+Every 10 iterations (10, 20, 30...), review patterns in:
 - Sizing failures (iterations that were too big)
 - Missing acceptance criteria
 - Tests that caught real bugs vs. tests that were useless
@@ -210,10 +224,18 @@ No programming tasks. No architectural decisions. Haiku is for summarization onl
   - Specific text content (test in unit tests via data files)
 - **Scratch Playwright tests:** `cd frontend && npx playwright test --config=playwright-scratch.config.ts`
 
+### Dev Server
+- **Start:** `cd frontend && npm run dev` — runs Vite on `http://localhost:3000`
+- **Port:** 3000 (configured in `frontend/vite.config.ts`)
+- **Reuse:** Playwright's `webServer.reuseExistingServer: true` means a running dev server is reused automatically. Start the server once, run E2E tests as many times as needed.
+- **When to start:** Before any manual browser verification or repeated E2E test runs during an iteration.
+
 ### Test Commands
 ```bash
+cd frontend
+npm run dev           # Start dev server (keep running in background)
 npm run test          # Vitest permanent unit tests
-npm run test:e2e      # Playwright permanent E2E tests
+npm run test:e2e      # Playwright permanent E2E tests (auto-starts server if not running)
 npm run test:all      # Both
 ```
 
@@ -233,7 +255,7 @@ npm run test:all      # Both
 ## Git Conventions
 
 - Commit messages: imperative mood, one line, under 72 chars. Body if needed.
-- Format: `iter-NNN: <what changed>` (e.g., `iter-001: scaffold project with phaser 3 and vite`)
+- Format: `iter-NN: <what changed>` (e.g., `iter-01: scaffold project with phaser 3 and vite`)
 - Never commit: node_modules, dist, .env, scratch test files, .DS_Store
 - Branch strategy: `main` only (for now). Feature branches when collaboration starts.
 - Every commit must have working code. No WIP commits on main.
@@ -267,7 +289,7 @@ Every scene has a try-catch around its `create()` method. If a scene fails, show
 Canvas scales to viewport. Touch input mapped to click. Text readable at 360px width minimum. But desktop is primary — don't over-engineer responsive.
 
 ### 9. Deployment Readiness from Day 1
-`npm run build` produces a deployable `dist/` folder from iteration 001. No "we'll figure out deployment later."
+`npm run build` produces a deployable `dist/` folder from iteration 01. No "we'll figure out deployment later."
 
 ### 10. Documentation Lives in Code
 Comments explain what and why. TypeScript types explain shape. Iteration notes explain decisions. No separate wiki. No external docs that drift.
