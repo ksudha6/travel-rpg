@@ -1,35 +1,41 @@
 # Iteration 14
 **Date started:** 2026-04-09
-**Bounded context:** Journey (per-scene drama)
+**Bounded context:** Journey (scene engine)
 **Status:** pending
 
 ## Context
-Iter 13 rewrote BasePhaseScene as a world-first beat engine. This iteration creates the most dramatic scene in the presentation — InTransitScene "The Zero Hour" — where competitor screens black out and the Arrival Protocol brings calm.
+Iter 13 added music and rebuilt MarketScene as a garden world. This iteration rewrites BasePhaseScene so all 5 journey phase scenes become worlds — characters move, buildings rise, power-ups glow, dialogue boxes replace centered text.
 
 ## JTBD
-When I reach the InTransitScene, I want to experience chaos (screens going dark, camera shaking) followed by calm (green fills, driver appears), so the Atlys argument hits viscerally, not just intellectually.
+When I click through a journey phase, I want to watch 6 visual moments — buildings rising, the character walking, a power-up glowing — with brief dialogue text, so the story is shown, not told.
 
 ## Acceptance Criteria
-- [ ] Beat 1: competitor "screens" appear lit then simultaneously black out
-- [ ] Camera shake effect on blackout, "No Service" label
-- [ ] Beat 3: eSIM bar fills green, Green Stripe driver appears, "Local number active"
-- [ ] Scene palette shifts from grey/red to green during beats 3-4
-- [ ] Beat 4: three sequential dialogue beats (eSIM, driver, flight delay)
-- [ ] Most visually dramatic scene in the entire presentation
+- [ ] Beat 0 (Thought): persona's thought with character sprite (already done in iter 12)
+- [ ] Beat 1 (Standard World): competitor buildings rise on right, character enters from left, one-line dialogue
+- [ ] Beat 2 (Anxiety): character walks to center, thought bubble grows above, brief dialogue
+- [ ] Beat 3 (Hook): power-up appears at center, character walks to collect it, brief dialogue
+- [ ] Beat 4+5 (Atlys Play + Advance): buildings dim, green overlay, character at right, advance prompt
+- [ ] All 5 phase scenes inherit the new behavior automatically
 - [ ] All tests pass, TSC clean
 
+## Already done (do NOT redo):
+- Beat 0 personalized with persona thought (iter 12)
+- addRestartButton already in create()
+- lineSpacing already set to 24
+- JourneyMapScene between phases (iter 12)
+
 ## Tasks
-- [ ] Override Beat 1: lit screens → blackout + camera shake
-- [ ] Override Beat 3: Arrival Protocol sequence (eSIM, driver, connectivity)
-- [ ] Color transition: grey/red → green during beats 3-4
-- [ ] Override Beat 4: three sequential dialogue beats
-- [ ] Scratch test: verify blackout timing and drama
+- [ ] Replace drawPixelGrid with drawSceneBackground in BasePhaseScene
+- [ ] Beat 1: drawCompetitorBuilding for each competitor + enterFromLeft + showDialogue
+- [ ] Beat 2: slideCharacter to CENTER + drawThoughtBubble + showDialogue
+- [ ] Beat 3: drawPowerUp at center + slideCharacter to collect + showDialogue
+- [ ] Beat 4+5: dim buildings + green overlay + slideCharacter RIGHT + showDialogue + exitRight
 
 ## Tests
 ### Scratch Tests
-- [ ] Visual: blackout feels shocking
-- [ ] Visual: green transition feels like relief
-- [ ] Visual: most dramatic scene in full flow
+- [ ] Visual: click through DreamingScene, verify 6 visual beats
+- [ ] Visual: character moves between anchor positions
+- [ ] Visual: buildings appear and dim
 
 ### Permanent Tests
 - [ ] All existing tests still pass

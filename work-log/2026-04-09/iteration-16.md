@@ -4,30 +4,30 @@
 **Status:** pending
 
 ## Context
-Iter 13 rewrote BasePhaseScene. Iters 14-15 gave InTransit, Dreaming, and PreDeparture their unique visuals. This iteration completes the journey with OnGround and PostTrip.
+Iter 13 rewrote BasePhaseScene as a world engine. Iter 14 gave InTransitScene its unique drama. This iteration gives DreamingScene and PreDepartureScene their unique visual signatures.
 
 ## JTBD
-When I reach OnGround, I want to see a hidden door open to the local world; when I reach PostTrip, I want to see a flywheel animation closing the loop, so the full journey arc feels complete.
+When I click through Dreaming and PreDeparture, I want to see billboards, dream bubbles, scattered app windows, and a trust trigger badge — so each phase feels distinct, not templated.
 
 ## Acceptance Criteria
-- [ ] OnGroundScene: storefronts for Headout/Google Maps/Instagram with tourist price tags
-- [ ] OnGroundScene: "Hacked Icon Access" opens hidden door, local apps appear, prices flip
-- [ ] PostTripScene: receipt pile, photo pile, competitor buildings
-- [ ] PostTripScene: flywheel circular animation with 5 phase emojis, loop closes
-- [ ] All 5 phase scenes verified as worlds
+- [ ] DreamingScene: billboards for Instagram/MMT, dream-bubble destinations overhead
+- [ ] DreamingScene: "Visa Reality Check" power-up colors dream bubbles green/yellow/red
+- [ ] PreDepartureScene: app windows floating in air, VFS queue as line of rectangles
+- [ ] PreDepartureScene: "Trust Trigger" power-up snaps windows into alignment + golden badge
+- [ ] Both scenes follow STORY.md beat-for-beat
 - [ ] All tests pass, TSC clean
 
 ## Tasks
-- [ ] OnGroundScene Beat 1: storefronts with price tags
-- [ ] OnGroundScene Beat 3: keycard + hidden door + price flip
-- [ ] PostTripScene Beat 1: receipt/photo pile visuals
-- [ ] PostTripScene Beat 4: flywheel animation connecting all 5 phases
+- [ ] DreamingScene Beat 1: billboards + signboards + dream bubbles
+- [ ] DreamingScene Beat 3: visa reality check color-tagging
+- [ ] PreDepartureScene Beat 1: app windows + VFS queue + clock
+- [ ] PreDepartureScene Beat 3: trust trigger alignment + badge
 - [ ] Verify both scenes against STORY.md
 
 ## Tests
 ### Scratch Tests
-- [ ] Visual: hidden door opens convincingly
-- [ ] Visual: flywheel loop is visually clear
+- [ ] Visual: Dreaming has visible billboards and color-tagged bubbles
+- [ ] Visual: PreDeparture chaos snaps to order
 
 ### Permanent Tests
 - [ ] All existing tests still pass

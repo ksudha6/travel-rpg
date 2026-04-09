@@ -5,11 +5,15 @@ import { PersonaId } from '../../../shared/types';
 import {
   TEXT,
   FONT,
+  COLORS,
+  ANCHOR,
   typeText,
-  drawPixelGrid,
   TypewriterText,
   addRestartButton,
+  slideCharacter,
+  exitRight,
 } from '@/ui/sceneConstants';
+import { drawGarden } from '@/ui/backgrounds';
 
 /**
  * MarketScene — "The Market Nobody Sees Whole" (STORY.md Act 1)
@@ -27,6 +31,7 @@ export class MarketScene extends Phaser.Scene {
   private beatObjects: Phaser.GameObjects.GameObject[] = [];
   private activeTypewriter: TypewriterText | null = null;
   private characterSelectActive = false;
+  private characterSprites: Map<PersonaId, Phaser.GameObjects.Image> = new Map();
 
   constructor() {
     super({ key: 'MarketScene' });
@@ -41,7 +46,7 @@ export class MarketScene extends Phaser.Scene {
       this.activeTypewriter = null;
       this.characterSelectActive = false;
 
-      drawPixelGrid(this, width, height);
+      drawGarden(this);
       addRestartButton(this);
 
       this.showBeat();
@@ -139,42 +144,82 @@ export class MarketScene extends Phaser.Scene {
     this.activeTypewriter = tw as TypewriterText;
   }
 
-  // ── Beat 2: Segments list ────────────────────────────────────
+  // ── Beat 2: Segments as garden plots ─────────────────────────
 
   private beat2_Segments(width: number, height: number): void {
+    // Header
     this.track(
       this.add
         .text(width / 2, 30, TAM.currentINR, {
           fontFamily: FONT,
           fontSize: '12px',
-          color: TEXT.MUTED,
+          color: TEXT.WHITE,
         })
         .setOrigin(0.5, 0),
     );
 
-    const startY = 90;
-    const lineH = 32;
+    // 7 segment plots as colored rectangles (2 rows: 4 top + 3 bottom)
+    const plotW = 130;
+    const plotH = 55;
+    const groundY = height * ANCHOR.GROUND_Y;
+    const topY = groundY + 15;
+    const botY = groundY + 85;
 
     MARKET_SEGMENTS.forEach((seg, i) => {
       const isAtlys = seg.atlysPresent;
-      const y = startY + i * lineH;
+      const row = i < 4 ? 0 : 1;
+      const col = row === 0 ? i : i - 4;
+      const cols = row === 0 ? 4 : 3;
+      const rowY = row === 0 ? topY : botY;
+      const totalW = cols * (plotW + 16) - 16;
+      const startX = (width - totalW) / 2;
+      const px = startX + col * (plotW + 16);
 
-      // Segment name + size
-      const label = `${seg.name}  ${seg.marketSize2025}`;
-      const text = this.track(
+      // Plot rectangle
+      const plotColor = isAtlys ? COLORS.ATLYS_GREEN : 0x2a4a3a;
+      const plotAlpha = isAtlys ? 0.8 : 0.5;
+      const rect = this.track(
+        this.add.rectangle(px + plotW / 2, rowY + plotH / 2, plotW, plotH, plotColor, plotAlpha),
+      );
+      rect.setStrokeStyle(isAtlys ? 2 : 1, isAtlys ? COLORS.ATLYS_GREEN : 0x4a6a5a);
+
+      // Segment name
+      this.track(
         this.add
-          .text(width / 2, y, isAtlys ? `★ ${label}  — ATLYS` : label, {
+          .text(px + plotW / 2, rowY + 10, seg.name, {
             fontFamily: FONT,
-            fontSize: '8px',
-            color: isAtlys ? TEXT.GREEN : TEXT.SUB,
+            fontSize: '6px',
+            color: isAtlys ? TEXT.GREEN : TEXT.WHITE,
           })
           .setOrigin(0.5, 0),
       );
 
-      // Pulse the Atlys segment
+      // Market size
+      this.track(
+        this.add
+          .text(px + plotW / 2, rowY + 28, seg.marketSize2025, {
+            fontFamily: FONT,
+            fontSize: '5px',
+            color: isAtlys ? TEXT.GREEN : TEXT.MUTED,
+          })
+          .setOrigin(0.5, 0),
+      );
+
+      // Atlys badge
       if (isAtlys) {
+        const badge = this.track(
+          this.add
+            .text(px + plotW / 2, rowY + plotH - 10, 'ATLYS', {
+              fontFamily: FONT,
+              fontSize: '6px',
+              color: '#000000',
+              backgroundColor: '#22c55e',
+              padding: { x: 4, y: 2 },
+            })
+            .setOrigin(0.5),
+        );
         this.tweens.add({
-          targets: text,
+          targets: badge,
           alpha: { from: 0.7, to: 1 },
           duration: 800,
           yoyo: true,
@@ -182,20 +227,20 @@ export class MarketScene extends Phaser.Scene {
         });
       }
 
-      // Fade in each segment
-      text.setAlpha(0);
+      // Fade in with stagger
+      rect.setAlpha(0);
       this.tweens.add({
-        targets: text,
-        alpha: isAtlys ? 1 : 0.8,
-        delay: i * 120,
+        targets: rect,
+        alpha: plotAlpha,
+        delay: i * 100,
         duration: 300,
       });
     });
 
-    // No typewriter on this beat — it's visual. Prompt to continue.
+    // Prompt
     const prompt = this.track(
       this.add
-        .text(width / 2, height - 50, 'click to continue', {
+        .text(width / 2, height - 30, 'click to continue', {
           fontFamily: FONT,
           fontSize: '7px',
           color: TEXT.MUTED,
@@ -203,11 +248,10 @@ export class MarketScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setAlpha(0),
     );
-
     this.tweens.add({
       targets: prompt,
       alpha: 0.6,
-      delay: MARKET_SEGMENTS.length * 120 + 400,
+      delay: MARKET_SEGMENTS.length * 100 + 400,
       duration: 500,
     });
   }
@@ -262,6 +306,7 @@ export class MarketScene extends Phaser.Scene {
         this.add.image(x, y, `char_${persona.id}`).setScale(0.14),
       );
       sprite.setInteractive({ useHandCursor: true });
+      this.characterSprites.set(persona.id, sprite);
 
       // Name tag
       this.track(
@@ -322,21 +367,39 @@ export class MarketScene extends Phaser.Scene {
     this.registry.set('journeyPhaseIndex', 0);
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
+    this.characterSelectActive = true;
 
     const { width } = this.scale;
-    this.add
-      .text(width / 2, this.scale.height - 40, `${name}'s journey begins...`, {
-        fontFamily: FONT,
-        fontSize: '9px',
-        color: TEXT.GREEN,
-      })
-      .setOrigin(0.5);
+    const selected = this.characterSprites.get(id);
 
-    this.time.delayedCall(1200, () => {
-      this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('JourneyMapScene');
-      });
+    // Fade out other sprites
+    this.characterSprites.forEach((sprite, pid) => {
+      if (pid !== id) {
+        this.tweens.add({ targets: sprite, alpha: 0, duration: 400 });
+      }
     });
+
+    // Slide selected to center
+    if (selected) {
+      slideCharacter(this, selected, width / 2, 600, () => {
+        this.add
+          .text(width / 2, this.scale.height - 40, `${name}'s journey begins...`, {
+            fontFamily: FONT,
+            fontSize: '9px',
+            color: TEXT.GREEN,
+          })
+          .setOrigin(0.5);
+
+        // Exit right after a pause
+        this.time.delayedCall(800, () => {
+          exitRight(this, selected, () => {
+            this.cameras.main.fadeOut(400, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+              this.scene.start('JourneyMapScene');
+            });
+          });
+        });
+      });
+    }
   }
 }

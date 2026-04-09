@@ -1,40 +1,36 @@
 # Iteration 17
 **Date started:** 2026-04-09
-**Bounded context:** Personas + Strategy + Presentation
+**Bounded context:** Journey (per-scene visuals)
 **Status:** pending
 
 ## Context
-All phase scenes rebuilt as worlds (iters 11-16). This capstone iteration adds the Savi companion, cinematic PunchlineScene walk, and grounds strategy scenes in the world.
+Iter 13 rewrote BasePhaseScene. Iters 14-15 gave InTransit, Dreaming, and PreDeparture their unique visuals. This iteration completes the journey with OnGround and PostTrip.
 
 ## JTBD
-When Atlys enters the journey, I want a green companion (Savi) to appear and walk alongside the character from that point forward, and the finale to show both walking together through memories, so the "Full Journey Companion" concept is literal, not abstract.
+When I reach OnGround, I want to see a hidden door open to the local world; when I reach PostTrip, I want to see a flywheel animation closing the loop, so the full journey arc feels complete.
 
 ## Acceptance Criteria
-- [ ] Savi sprite loaded in PreloadScene
-- [ ] Savi appears at first hook beat (DreamingScene), walks slightly behind character
-- [ ] Savi stays present for all subsequent phases (registry flag)
-- [ ] PunchlineScene: character + Savi walk LEFT→RIGHT, phase icons flash at 5 positions
-- [ ] Strategy scenes: boardroom background, character at LEFT observing
-- [ ] Full run-through: Title → Punchline works, music plays, Savi appears and stays
-- [ ] All tests pass, TSC clean, build succeeds
+- [ ] OnGroundScene: storefronts for Headout/Google Maps/Instagram with tourist price tags
+- [ ] OnGroundScene: "Hacked Icon Access" opens hidden door, local apps appear, prices flip
+- [ ] PostTripScene: receipt pile, photo pile, competitor buildings
+- [ ] PostTripScene: flywheel circular animation with 5 phase emojis, loop closes
+- [ ] All 5 phase scenes verified as worlds
+- [ ] All tests pass, TSC clean
 
 ## Tasks
-- [ ] HUMAN: generate Savi sprite, save as assets/characters/savi.png
-- [ ] Savi in BasePhaseScene: spawn at first hook, persist via registry
-- [ ] PunchlineScene: cinematic walk with phase icon flashes + Savi alongside
-- [ ] Strategy scenes: boardroom background + character presence
-- [ ] Full run-through verification + E2E tests
+- [ ] OnGroundScene Beat 1: storefronts with price tags
+- [ ] OnGroundScene Beat 3: keycard + hidden door + price flip
+- [ ] PostTripScene Beat 1: receipt/photo pile visuals
+- [ ] PostTripScene Beat 4: flywheel animation connecting all 5 phases
+- [ ] Verify both scenes against STORY.md
 
 ## Tests
 ### Scratch Tests
-- [ ] Visual: Savi appears at hook, stays for subsequent scenes
-- [ ] Visual: PunchlineScene walk is cinematic
-- [ ] Visual: full flow tells a coherent story
+- [ ] Visual: hidden door opens convincingly
+- [ ] Visual: flywheel loop is visually clear
 
 ### Permanent Tests
-- [ ] All unit tests pass
-- [ ] All E2E tests pass
-- [ ] npm run build produces clean dist
+- [ ] All existing tests still pass
 
 ## Decision Summary
 [To be written at iteration close]

@@ -1,33 +1,35 @@
 # Iteration 15
 **Date started:** 2026-04-09
-**Bounded context:** Journey (per-scene visuals)
+**Bounded context:** Journey (per-scene drama)
 **Status:** pending
 
 ## Context
-Iter 13 rewrote BasePhaseScene as a world engine. Iter 14 gave InTransitScene its unique drama. This iteration gives DreamingScene and PreDepartureScene their unique visual signatures.
+Iter 13 rewrote BasePhaseScene as a world-first beat engine. This iteration creates the most dramatic scene in the presentation — InTransitScene "The Zero Hour" — where competitor screens black out and the Arrival Protocol brings calm.
 
 ## JTBD
-When I click through Dreaming and PreDeparture, I want to see billboards, dream bubbles, scattered app windows, and a trust trigger badge — so each phase feels distinct, not templated.
+When I reach the InTransitScene, I want to experience chaos (screens going dark, camera shaking) followed by calm (green fills, driver appears), so the Atlys argument hits viscerally, not just intellectually.
 
 ## Acceptance Criteria
-- [ ] DreamingScene: billboards for Instagram/MMT, dream-bubble destinations overhead
-- [ ] DreamingScene: "Visa Reality Check" power-up colors dream bubbles green/yellow/red
-- [ ] PreDepartureScene: app windows floating in air, VFS queue as line of rectangles
-- [ ] PreDepartureScene: "Trust Trigger" power-up snaps windows into alignment + golden badge
-- [ ] Both scenes follow STORY.md beat-for-beat
+- [ ] Beat 1: competitor "screens" appear lit then simultaneously black out
+- [ ] Camera shake effect on blackout, "No Service" label
+- [ ] Beat 3: eSIM bar fills green, Green Stripe driver appears, "Local number active"
+- [ ] Scene palette shifts from grey/red to green during beats 3-4
+- [ ] Beat 4: three sequential dialogue beats (eSIM, driver, flight delay)
+- [ ] Most visually dramatic scene in the entire presentation
 - [ ] All tests pass, TSC clean
 
 ## Tasks
-- [ ] DreamingScene Beat 1: billboards + signboards + dream bubbles
-- [ ] DreamingScene Beat 3: visa reality check color-tagging
-- [ ] PreDepartureScene Beat 1: app windows + VFS queue + clock
-- [ ] PreDepartureScene Beat 3: trust trigger alignment + badge
-- [ ] Verify both scenes against STORY.md
+- [ ] Override Beat 1: lit screens → blackout + camera shake
+- [ ] Override Beat 3: Arrival Protocol sequence (eSIM, driver, connectivity)
+- [ ] Color transition: grey/red → green during beats 3-4
+- [ ] Override Beat 4: three sequential dialogue beats
+- [ ] Scratch test: verify blackout timing and drama
 
 ## Tests
 ### Scratch Tests
-- [ ] Visual: Dreaming has visible billboards and color-tagged bubbles
-- [ ] Visual: PreDeparture chaos snaps to order
+- [ ] Visual: blackout feels shocking
+- [ ] Visual: green transition feels like relief
+- [ ] Visual: most dramatic scene in full flow
 
 ### Permanent Tests
 - [ ] All existing tests still pass

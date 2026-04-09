@@ -16,6 +16,11 @@ export class TitleScene extends Phaser.Scene {
       gfx.fillStyle(0xffdb58, 1);
       gfx.fillRect(0, 0, width, height);
 
+      // Music (start once, persists across scenes)
+      if (!this.sound.get('bgm')) {
+        this.sound.play('bgm', { loop: true, volume: 0.1, rate: 0.85 });
+      }
+
       // Character sprite on ground line
       this.add
         .image(width * ANCHOR.RIGHT, height * ANCHOR.GROUND_Y, 'char_arjun')
@@ -66,9 +71,27 @@ export class TitleScene extends Phaser.Scene {
         repeat: -1,
       });
 
+      // Mute toggle
+      const muteBtn = this.add
+        .text(width - 16, 12, 'M', {
+          fontFamily: FONT,
+          fontSize: '10px',
+          color: '#444444',
+        })
+        .setOrigin(1, 0)
+        .setInteractive({ useHandCursor: true });
+      muteBtn.on('pointerdown', () => {
+        this.sound.mute = !this.sound.mute;
+        muteBtn.setColor(this.sound.mute ? '#aa4444' : '#444444');
+      });
+
       // Input
       cta.on('pointerdown', () => this.advance());
       this.input.keyboard?.once('keydown-SPACE', () => this.advance());
+      this.input.keyboard?.on('keydown-M', () => {
+        this.sound.mute = !this.sound.mute;
+        muteBtn.setColor(this.sound.mute ? '#aa4444' : '#444444');
+      });
     } catch (error) {
       console.error('TitleScene failed to create:', error);
       const { width, height } = this.scale;
