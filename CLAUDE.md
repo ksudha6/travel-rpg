@@ -64,16 +64,14 @@ This project is governed by a bounded context model to keep iteration scope smal
 ```
 work-log/
   <YYYY-MM-DD>/          ← date folder (day iteration starts)
-    iteration-NN/         ← iteration folder lives INSIDE the date folder
-      iteration-NN.md     ← iteration log file
+    iteration-NN.md       ← iteration log file directly inside date folder
 ```
-Example: `work-log/2026-04-08/iteration-01/iteration-01.md`
+Example: `work-log/2026-04-08/iteration-01.md`
 
 **Steps:**
-1. Find the latest iteration number by scanning `work-log/*/iteration-*/`. Increment by 1.
+1. Find the latest iteration number by scanning `work-log/*/iteration-*.md`. Increment by 1.
 2. Create the date folder if it doesn't exist: `work-log/<YYYY-MM-DD>/`
-3. Create the iteration folder inside it: `work-log/<YYYY-MM-DD>/iteration-NN/`
-4. Create `iteration-NN.md` inside that folder with this template:
+3. Create `iteration-NN.md` inside the date folder with this template:
 
 ```markdown
 # Iteration NN
