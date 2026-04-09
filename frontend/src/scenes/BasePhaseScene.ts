@@ -8,6 +8,7 @@ import {
   typeText,
   drawPixelGrid,
   TypewriterText,
+  addRestartButton,
 } from '@/ui/sceneConstants';
 
 /**
@@ -46,11 +47,15 @@ export abstract class BasePhaseScene extends Phaser.Scene {
 
       // Persistent layer
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
 
       // Show beat 0
       this.showBeat();
 
-      this.input.on('pointerdown', () => this.handleClick());
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return; // click was on an interactive object (e.g. nav button)
+        this.handleClick();
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error(`${this.scene.key} failed to create:`, error);
@@ -129,6 +134,7 @@ export abstract class BasePhaseScene extends Phaser.Scene {
         color: TEXT.WHITE,
         align: 'center',
         wordWrap: { width: 900 },
+        lineSpacing: 24,
       },
     );
     tw.setOrigin(0.5);
@@ -176,6 +182,7 @@ export abstract class BasePhaseScene extends Phaser.Scene {
       color: TEXT.SUB,
       align: 'center',
       wordWrap: { width: 800 },
+      lineSpacing: 24,
     });
     tw.setOrigin(0.5, 0);
     this.track(tw);
@@ -221,6 +228,7 @@ export abstract class BasePhaseScene extends Phaser.Scene {
       color: '#ff8888',
       align: 'center',
       wordWrap: { width: 800 },
+      lineSpacing: 24,
     });
     tw.setOrigin(0.5, 0);
     this.track(tw);
@@ -267,6 +275,7 @@ export abstract class BasePhaseScene extends Phaser.Scene {
       color: '#cccccc',
       align: 'center',
       wordWrap: { width: 800 },
+      lineSpacing: 24,
     });
     tw.setOrigin(0.5, 0);
     this.track(tw);
@@ -305,6 +314,7 @@ export abstract class BasePhaseScene extends Phaser.Scene {
       fontSize: '8px',
       color: '#aaffaa',
       wordWrap: { width: 900 },
+      lineSpacing: 24,
     });
     tw.setOrigin(0.5, 0);
     this.track(tw);

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { COMPETITIVE_POSITIONING } from '@/data/strategy';
-import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText } from '@/ui/sceneConstants';
+import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText, addRestartButton } from '@/ui/sceneConstants';
 
 export class CompetitiveScene extends Phaser.Scene {
   private currentBeat = 0;
@@ -22,9 +22,13 @@ export class CompetitiveScene extends Phaser.Scene {
       this.transitioning = false;
 
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
       this.showBeat();
 
-      this.input.on('pointerdown', () => this.handleClick());
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return;
+        this.handleClick();
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('CompetitiveScene failed to create:', error);
@@ -153,7 +157,7 @@ export class CompetitiveScene extends Phaser.Scene {
     const rightX = width / 2 + 20;
 
     this.track(this.add.text(leftX, 20, "Why Headout can't\nadd visas", {
-      fontFamily: FONT, fontSize: '9px', color: TEXT.RED, lineSpacing: 6,
+      fontFamily: FONT, fontSize: '9px', color: TEXT.RED, lineSpacing: 24,
     }));
 
     COMPETITIVE_POSITIONING.headoutBarrier.forEach((item, i) => {
@@ -163,7 +167,7 @@ export class CompetitiveScene extends Phaser.Scene {
     });
 
     this.track(this.add.text(rightX, 20, "Why Atlys can't just\nadd activities", {
-      fontFamily: FONT, fontSize: '9px', color: '#f59e0b', lineSpacing: 6,
+      fontFamily: FONT, fontSize: '9px', color: '#f59e0b', lineSpacing: 24,
     }));
 
     COMPETITIVE_POSITIONING.atlysBarrier.forEach((item, i) => {

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { HYPOTHESES } from '@/data/strategy';
-import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText } from '@/ui/sceneConstants';
+import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText, addRestartButton } from '@/ui/sceneConstants';
 
 export class HypothesesScene extends Phaser.Scene {
   private currentBeat = 0;
@@ -22,9 +22,13 @@ export class HypothesesScene extends Phaser.Scene {
       this.transitioning = false;
 
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
       this.showBeat();
 
-      this.input.on('pointerdown', () => this.handleClick());
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return;
+        this.handleClick();
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('HypothesesScene failed to create:', error);
@@ -79,7 +83,7 @@ export class HypothesesScene extends Phaser.Scene {
     const tw = typeText(
       this, width / 2, height / 2,
       'Three hypotheses.\nScored honestly.',
-      { fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE, align: 'center', lineSpacing: 10 },
+      { fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE, align: 'center', lineSpacing: 24 },
     );
     tw.setOrigin(0.5);
     this.track(tw);
@@ -173,7 +177,7 @@ export class HypothesesScene extends Phaser.Scene {
     const tw = typeText(
       this, width / 2, height / 2,
       'We are not presenting the best case.\nWe are presenting the honest one.',
-      { fontFamily: FONT, fontSize: '10px', color: TEXT.WHITE, align: 'center', lineSpacing: 10 },
+      { fontFamily: FONT, fontSize: '10px', color: TEXT.WHITE, align: 'center', lineSpacing: 24 },
     );
     tw.setOrigin(0.5);
     this.track(tw);

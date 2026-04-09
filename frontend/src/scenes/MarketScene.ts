@@ -8,6 +8,7 @@ import {
   typeText,
   drawPixelGrid,
   TypewriterText,
+  addRestartButton,
 } from '@/ui/sceneConstants';
 
 /**
@@ -41,10 +42,14 @@ export class MarketScene extends Phaser.Scene {
       this.characterSelectActive = false;
 
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
 
       this.showBeat();
 
-      this.input.on('pointerdown', () => this.handleClick());
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return;
+        this.handleClick();
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('MarketScene failed to create:', error);
@@ -220,7 +225,7 @@ export class MarketScene extends Phaser.Scene {
         fontSize: '10px',
         color: TEXT.WHITE,
         align: 'center',
-        lineSpacing: 12,
+        lineSpacing: 24,
       },
     );
     tw.setOrigin(0.5);
@@ -261,7 +266,7 @@ export class MarketScene extends Phaser.Scene {
       // Name tag
       this.track(
         this.add
-          .text(x, y + 90, persona.name, {
+          .text(x, y + 95, persona.name, {
             fontFamily: FONT,
             fontSize: '8px',
             color: TEXT.WHITE,
@@ -272,12 +277,13 @@ export class MarketScene extends Phaser.Scene {
       // Subtitle
       this.track(
         this.add
-          .text(x, y + 110, persona.subtitle, {
+          .text(x, y + 120, persona.subtitle, {
             fontFamily: FONT,
             fontSize: '6px',
             color: TEXT.MUTED,
             align: 'center',
             wordWrap: { width: 220 },
+            lineSpacing: 12,
           })
           .setOrigin(0.5, 0),
       );
@@ -285,12 +291,13 @@ export class MarketScene extends Phaser.Scene {
       // One-liner on hover
       const oneLiner = this.track(
         this.add
-          .text(x, y + 145, `"${persona.oneLiner}"`, {
+          .text(x, y + 165, `"${persona.oneLiner}"`, {
             fontFamily: FONT,
             fontSize: '6px',
             color: TEXT.SUB,
             align: 'center',
             wordWrap: { width: 230 },
+            lineSpacing: 12,
           })
           .setOrigin(0.5, 0)
           .setAlpha(0),

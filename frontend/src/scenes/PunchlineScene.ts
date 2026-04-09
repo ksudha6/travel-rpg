@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { PersonaId } from '../../../shared/types';
-import { FONT, TEXT, drawPixelGrid } from '@/ui/sceneConstants';
+import { FONT, TEXT, drawPixelGrid, addRestartButton } from '@/ui/sceneConstants';
 
 const LINES = [
   'The best travel tech is the tech you never have to search for.',
@@ -29,6 +29,7 @@ export class PunchlineScene extends Phaser.Scene {
       this.lineTexts = [];
 
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
 
       // Character sprite
       const personaId = this.registry.get('selectedPersona') as PersonaId;
@@ -77,7 +78,10 @@ export class PunchlineScene extends Phaser.Scene {
       });
 
       // Click to skip
-      this.input.on('pointerdown', () => this.skipAhead(width, height));
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return;
+        this.skipAhead(width, height);
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.skipAhead(width, height));
     } catch (error) {
       console.error('PunchlineScene failed to create:', error);

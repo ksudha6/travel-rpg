@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GTM_MOTIONS } from '@/data/strategy';
-import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText } from '@/ui/sceneConstants';
+import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText, addRestartButton } from '@/ui/sceneConstants';
 
 export class GTMScene extends Phaser.Scene {
   private currentBeat = 0;
@@ -22,9 +22,13 @@ export class GTMScene extends Phaser.Scene {
       this.transitioning = false;
 
       drawPixelGrid(this, width, height);
+      addRestartButton(this);
       this.showBeat();
 
-      this.input.on('pointerdown', () => this.handleClick());
+      this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (currentlyOver.length > 0) return;
+        this.handleClick();
+      });
       this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('GTMScene failed to create:', error);
@@ -79,7 +83,7 @@ export class GTMScene extends Phaser.Scene {
     const tw = typeText(
       this, width / 2, height / 2,
       'Three paths to market.\nOne clear winner.',
-      { fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE, align: 'center', lineSpacing: 10 },
+      { fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE, align: 'center', lineSpacing: 24 },
     );
     tw.setOrigin(0.5);
     this.track(tw);
@@ -156,7 +160,7 @@ export class GTMScene extends Phaser.Scene {
     const tw = typeText(
       this, width / 2, height / 2,
       "Like Intel Inside.\n'Visa by Atlys' in every OTA checkout.\nAtlys becomes the infrastructure,\nnot the destination.",
-      { fontFamily: FONT, fontSize: '9px', color: TEXT.GREEN, align: 'center', lineSpacing: 10 },
+      { fontFamily: FONT, fontSize: '9px', color: TEXT.GREEN, align: 'center', lineSpacing: 24 },
     );
     tw.setOrigin(0.5);
     this.track(tw);
