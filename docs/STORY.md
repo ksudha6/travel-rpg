@@ -8,15 +8,79 @@
 
 ---
 
-## FORMAT: SCROLLYTELLING DOCUMENTARY
+## FORMAT: GAME-WORLD SCROLLYTELLING
 
-The viewer WATCHES the story unfold. They pick a persona. The LEGO character
-walks a path. Pain points appear as obstacles. Competitors appear as buildings
-or NPCs. Atlys opportunities emerge as power-ups. No gameplay. No chatbot.
-A visual narrative that builds the case for Atlys as the Full Journey Companion.
+The viewer enters a **game world**. Music plays from frame one. Pixel art sets
+the mood. They pick a persona. The LEGO character walks through themed
+environments — an airport terminal, a garden, city streets. Data lives inside
+the world: market segments are physical places, competitors are buildings/NPCs,
+Atlys opportunities are power-ups. The feel is LennyRPG: nostalgic 8-bit RPG
+aesthetic, atmospheric, immersive. Not a dashboard. Not a slide deck. A world
+you want to stay in.
 
 **Reference:** LennyRPG by Ben Shih — Phaser 3 + Claude Code + ChatGPT art, built in 8 hours.
 **Tech:** Phaser 3 + Vite + TypeScript. Canvas: 1280×720. Pixel art. No React.
+
+### Presentation Principles
+1. **World first, data second.** Every screen is a place, not a chart. Market
+   segments are garden plots or airport gates — not rectangles on black.
+2. **Atmosphere from the first pixel.** Background music, pixel art backgrounds,
+   and character sprites load before anything else (PreloadScene).
+3. **Entry screen = emotional hook.** Title screen must feel like entering a
+   game: character visible, music playing, a deliberate "Start Journey" moment.
+4. **Characters are in-world.** Personas are NPCs standing in the scene, not
+   text cards. Hover/click reveals their personality.
+5. **Transitions are spatial.** The character walks between scenes, not just
+   fade-to-black. The world is continuous.
+
+### Character Movement Model
+
+Sprites are **static PNGs** — no sprite sheets, no walk-cycle frames. Movement
+is achieved through **Phaser tweens** (slide the x/y position) with a subtle
+vertical bob (sine wave, ~3px amplitude) during motion to give the feeling of
+walking. When stationary, the sprite is still — no idle animation.
+
+**Three anchor positions on screen:**
+- **LEFT** — `x: 15%` of canvas width. Used when the character is observing
+  something on the right (competitor buildings, data reveals, power-ups).
+- **CENTER** — `x: 50%`. Used for character-focused moments (anxiety beat,
+  hook pickup, punchline).
+- **RIGHT** — `x: 85%`. Used when the character has moved past something
+  (transition out, looking back at what was learned).
+
+**Y position:** Characters sit on a ground line at `y: 75%` of canvas height
+in all scenes. This is the "floor" of the world.
+
+**Scene entry:** Character slides in from off-screen left (`x: -50`) to their
+first anchor position. Duration: ~800ms, ease: `Power2`.
+
+**Scene exit:** Character slides off-screen right (`x: canvas width + 50`).
+Duration: ~600ms. Scene fade begins simultaneously.
+
+**Between beats (within a scene):**
+The character moves to the anchor that fits the narrative moment:
+
+| Beat | Position | Why |
+|------|----------|-----|
+| Tagline | Not visible (fades in after) | Text-only moment |
+| Standard World | LEFT | Observing competitor buildings appearing on right |
+| Persona Anxiety | CENTER | Focus on the character — thought bubble above |
+| Offbeat Hook | CENTER → picks up power-up | Hook appears at center, character "collects" it |
+| Atlys Play | RIGHT | Character has moved forward, green overlay behind |
+| Advance prompt | RIGHT | Ready to walk off to next scene |
+
+**MarketScene (character select):**
+- 4 NPCs stand evenly spaced at `y: 75%`
+- On click, selected character walks to CENTER, others fade out
+- Selected character then walks off-screen right → next scene
+
+**PunchlineScene (fast-forward):**
+- Character walks LEFT → RIGHT slowly across the full screen
+- As the character passes each position, phase icons flash behind them
+- At RIGHT, character stops. Final text appears.
+
+**Movement utility function:** `slideCharacter(scene, sprite, targetX, duration?, onComplete?)`
+Lives in `frontend/src/ui/sceneConstants.ts` alongside existing typewriter utility.
 
 ---
 
@@ -52,23 +116,29 @@ If any PNG is missing, stop and ask the user before proceeding.
 
 ---
 
-### ACT 1 — THE MARKET NOBODY SEES WHOLE
-**Scene file:** `TitleScene.ts` → `MarketScene.ts`
+### ACT 1 — ENTRY + THE MARKET NOBODY SEES WHOLE
+**Scene files:** `PreloadScene.ts` → `TitleScene.ts` → `MarketScene.ts`
 **Data source:** `market.ts` → `TOTAL_INDIAN_TRAVEL_TAM`, `MARKET_SEGMENTS[]`
 
-**What the viewer sees:**
-- Camera pulls back from a single LEGO traveler to reveal an enormous map of India
-- Text fades in: *"₹18,00,000 crore. That's the Indian travel market by 2030."*
-- The map fractures into 7 glowing segments — one per market category
-- Each segment lights up with its value: Flights ($25–51B), Hotels ($8.95B),
-  Activities ($300B+ global), Ground Transport ($1.9B), Insurance ($1.17B),
-  Visas ($34.26M India e-visa), Food (50%+ of trip spend motivation)
-- One segment — VISAS — is tiny. It blinks.
-- Text: *"Atlys owns 1–2% of this pie. The other 98% is the journey."*
-- A single question appears: *"Who owns the rest?"*
+**ENTRY (TitleScene):**
+- Pixel art background — an airport terminal or garden path at dawn
+- Background music starts (looping, atmospheric, 8-bit style)
+- One LEGO character sprite visible, standing in the scene
+- Title text: "Atlys Travel Experience" in pixel/retro font
+- Animated "Start Journey" CTA — pulsing, inviting
+- Click/tap to begin
 
-**Scene transition:** The map zooms into the VISA segment. A path appears.
-Four LEGO characters stand at the start of the path. The viewer must pick one.
+**THE MARKET (MarketScene) — presented as a WORLD, not a dashboard:**
+- The scene is a **garden** (7 plots) or **airport terminal** (7 gates)
+- Each market segment is a physical place the viewer can see:
+  Flights gate, Hotels gate, Activities garden plot, etc.
+- Segment values appear as signs/labels on each place
+- The VISAS plot/gate is small but glowing green — Atlys is here
+- Text fades in: *"₹18,00,000 crore. That's the Indian travel market by 2030."*
+- Text: *"Atlys owns 1–2% of this pie. The other 98% is the journey."*
+- 4 LEGO characters stand as NPCs in the scene — click one to begin
+
+**Scene transition:** Camera follows the selected character down a path.
 
 **Verify before building:**
 - [ ] `TOTAL_INDIAN_TRAVEL_TAM` in market.ts matches "$220B (2024) → $470B+ (2030)"
@@ -419,18 +489,21 @@ Companion:        ChatGPT (partial)   ★ ATLYS? ← nobody is here
 
 ## SCENE BUILD ORDER (ITERATIONS)
 
-| Iteration | Scene | Dependencies |
+**Philosophy: atmosphere first, data inside the world, not the other way around.**
+
+| Iteration | What | Dependencies |
 |---|---|---|
-| 001 | TitleScene — canvas renders, title text, character grid | None |
-| 002 | MarketScene — TAM segments, $220B visual | market.ts verified |
-| 003 | CharacterSelectScene — 4 personas, sprite select | personas.ts + assets verified |
-| 004 | DreamingScene — Phase 1 complete | journeyPhases.ts[DREAMING] verified |
-| 005 | PreDepartureScene — Phase 2 complete | journeyPhases.ts[PRE_DEPARTURE] verified |
-| 006 | InTransitScene — Phase 3 complete (THE ZERO HOUR) | journeyPhases.ts[IN_TRANSIT] verified |
-| 007 | OnGroundScene — Phase 4 complete | journeyPhases.ts[ON_GROUND] verified |
-| 008 | PostTripScene — Phase 5 + flywheel | journeyPhases.ts[POST_TRIP] verified |
-| 009 | HypothesesScene + CompetitiveScene | strategy.ts verified |
-| 010 | GTMScene + PunchlineScene + full run-through | All files verified |
+| 001–004 | ✅ Scaffold, data alignment, data tests, MarketScene v1 | Done |
+| 005 | Research: source music (OpenGameArt.org), test sprite scaling, pick background style | None |
+| 006 | Title screen overhaul: PreloadScene, pixel background, character sprite, music, "Start Journey" CTA | 005 research |
+| 007 | World scene: garden/airport with market segments as physical places, characters as in-world NPCs | 006 assets loaded |
+| 008 | DreamingScene — Phase 1 (character walks, pain points, competitors as buildings, Atlys play) | journeyPhases.ts[DREAMING] |
+| 009 | PreDepartureScene — Phase 2 | journeyPhases.ts[PRE_DEPARTURE] |
+| 010 | InTransitScene — Phase 3 (THE ZERO HOUR — most dramatic scene) | journeyPhases.ts[IN_TRANSIT] |
+| 011 | OnGroundScene — Phase 4 | journeyPhases.ts[ON_GROUND] |
+| 012 | PostTripScene — Phase 5 + flywheel | journeyPhases.ts[POST_TRIP] |
+| 013 | HypothesesScene + CompetitiveScene | strategy.ts |
+| 014 | GTMScene + PunchlineScene + full run-through + polish | All files |
 
 ---
 
