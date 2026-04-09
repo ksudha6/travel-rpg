@@ -110,34 +110,51 @@ export abstract class BasePhaseScene extends Phaser.Scene {
     }
   }
 
-  // ── Beat 0: Tagline ──────────────────────────────────────────
+  // ── Beat 0: Persona thought ──────────────────────────────────
+  // The character's personal thought for this phase.
+  // JourneyMapScene already showed the phase title as a landmark,
+  // so beat 0 is the persona's inner voice.
 
   private beatTagline(width: number, height: number): void {
+    const persona = PERSONAS[this.personaId];
+    const thought = this.phase.personaAnxieties[this.personaId];
+
+    // Character sprite centered
+    const spriteKey = `char_${this.personaId}`;
     this.track(
       this.add
-        .text(width / 2, height / 2 - 50, `${this.phase.emoji} ${this.phase.title}`, {
+        .image(width / 2, height * 0.65, spriteKey)
+        .setScale(0.18)
+        .setOrigin(0.5, 1),
+    );
+
+    // Persona name
+    this.track(
+      this.add
+        .text(width / 2, height * 0.3 - 40, `${persona.name} thinks...`, {
           fontFamily: FONT,
-          fontSize: '10px',
+          fontSize: '9px',
           color: TEXT.SUB,
         })
         .setOrigin(0.5),
     );
 
+    // Persona's thought for this phase
     const tw = typeText(
       this,
       width / 2,
-      height / 2,
-      this.phase.sceneTagline,
+      height * 0.3,
+      `"${thought}"`,
       {
         fontFamily: FONT,
-        fontSize: '12px',
-        color: TEXT.WHITE,
+        fontSize: '8px',
+        color: '#ff8888',
         align: 'center',
-        wordWrap: { width: 900 },
+        wordWrap: { width: 800 },
         lineSpacing: 24,
       },
     );
-    tw.setOrigin(0.5);
+    tw.setOrigin(0.5, 0);
     this.track(tw);
     this.activeTypewriter = tw as TypewriterText;
   }
@@ -394,9 +411,20 @@ export abstract class BasePhaseScene extends Phaser.Scene {
   private transitionToNext(): void {
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
+
+    // Increment journey phase index for the map screen
+    const currentIdx = (this.registry.get('journeyPhaseIndex') as number) ?? 0;
+    const nextIdx = currentIdx + 1;
+    this.registry.set('journeyPhaseIndex', nextIdx);
+
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start(this.nextScene);
+      // After last phase (PostTrip, index 4), go to strategy scenes
+      if (nextIdx >= 5) {
+        this.scene.start(this.nextScene); // HypothesesScene
+      } else {
+        this.scene.start('JourneyMapScene');
+      }
     });
   }
 }

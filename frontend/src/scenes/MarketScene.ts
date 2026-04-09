@@ -319,12 +319,13 @@ export class MarketScene extends Phaser.Scene {
 
   private selectCharacter(id: PersonaId, name: string): void {
     this.registry.set('selectedPersona', id);
+    this.registry.set('journeyPhaseIndex', 0);
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
 
-    const { width, height } = this.scale;
+    const { width } = this.scale;
     this.add
-      .text(width / 2, height - 40, `${name}'s journey begins...`, {
+      .text(width / 2, this.scale.height - 40, `${name}'s journey begins...`, {
         fontFamily: FONT,
         fontSize: '9px',
         color: TEXT.GREEN,
@@ -334,7 +335,7 @@ export class MarketScene extends Phaser.Scene {
     this.time.delayedCall(1200, () => {
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('DreamingScene');
+        this.scene.start('JourneyMapScene');
       });
     });
   }

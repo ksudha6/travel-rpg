@@ -127,9 +127,17 @@ describe('SCENE_ORDER navigation', () => {
     expect(SCENE_ORDER[idx - 1]).toBe('TitleScene');
   });
 
-  it('back from DreamingScene goes to MarketScene', () => {
+  it('JourneyMapScene is between MarketScene and DreamingScene', () => {
+    const marketIdx = SCENE_ORDER.indexOf('MarketScene');
+    const journeyIdx = SCENE_ORDER.indexOf('JourneyMapScene');
+    const dreamingIdx = SCENE_ORDER.indexOf('DreamingScene');
+    expect(journeyIdx).toBe(marketIdx + 1);
+    expect(dreamingIdx).toBe(journeyIdx + 1);
+  });
+
+  it('back from DreamingScene goes to JourneyMapScene', () => {
     const idx = SCENE_ORDER.indexOf('DreamingScene');
-    expect(SCENE_ORDER[idx - 1]).toBe('MarketScene');
+    expect(SCENE_ORDER[idx - 1]).toBe('JourneyMapScene');
   });
 
   it('back from each scene goes to its predecessor', () => {

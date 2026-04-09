@@ -39,6 +39,7 @@ export const FONT = "'Press Start 2P', monospace";
 export const SCENE_ORDER = [
   'TitleScene',
   'MarketScene',
+  'JourneyMapScene',
   'DreamingScene',
   'PreDepartureScene',
   'InTransitScene',

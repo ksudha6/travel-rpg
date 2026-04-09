@@ -122,13 +122,13 @@ export class HypothesesScene extends Phaser.Scene {
       // Title
       this.track(this.add.text(cx, cardY + 32, hyp.title, {
         fontFamily: FONT, fontSize: '7px', color: TEXT.WHITE,
-        align: 'center', wordWrap: { width: cardW - 24 },
+        align: 'center', wordWrap: { width: cardW - 24 }, lineSpacing: 14,
       }).setOrigin(0.5, 0));
 
       // Thesis
-      this.track(this.add.text(cx, cardY + 75, hyp.thesis, {
+      this.track(this.add.text(cx, cardY + 80, hyp.thesis, {
         fontFamily: FONT, fontSize: '6px', color: TEXT.SUB,
-        wordWrap: { width: cardW - 24 },
+        wordWrap: { width: cardW - 24 }, lineSpacing: 14,
       }).setOrigin(0.5, 0));
 
       // Divider
@@ -145,7 +145,7 @@ export class HypothesesScene extends Phaser.Scene {
       ];
 
       scores.forEach((s, si) => {
-        const barY = cardY + 230 + si * 38;
+        const barY = cardY + 240 + si * 42;
         const barX = x + 16;
         const barMaxW = 180;
 
@@ -162,11 +162,11 @@ export class HypothesesScene extends Phaser.Scene {
       });
 
       // Strength / Weakness
-      this.track(this.add.text(x + 12, cardY + cardH - 70, `+ ${hyp.strength}`, {
-        fontFamily: FONT, fontSize: '6px', color: TEXT.GREEN, wordWrap: { width: cardW - 24 },
+      this.track(this.add.text(x + 12, cardY + cardH - 80, `+ ${hyp.strength}`, {
+        fontFamily: FONT, fontSize: '6px', color: TEXT.GREEN, wordWrap: { width: cardW - 24 }, lineSpacing: 12,
       }));
       this.track(this.add.text(x + 12, cardY + cardH - 35, `- ${hyp.weakness}`, {
-        fontFamily: FONT, fontSize: '6px', color: TEXT.RED, wordWrap: { width: cardW - 24 },
+        fontFamily: FONT, fontSize: '6px', color: TEXT.RED, wordWrap: { width: cardW - 24 }, lineSpacing: 12,
       }));
     });
   }

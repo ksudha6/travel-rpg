@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { PreloadScene } from '../scenes/PreloadScene';
 import { TitleScene } from '../scenes/TitleScene';
 import { MarketScene } from '../scenes/MarketScene';
+import { JourneyMapScene } from '../scenes/JourneyMapScene';
 import { DreamingScene } from '../scenes/DreamingScene';
 import { PreDepartureScene } from '../scenes/PreDepartureScene';
 import { InTransitScene } from '../scenes/InTransitScene';
@@ -27,6 +28,7 @@ export const GAME_CONFIG: Phaser.Types.Core.GameConfig = {
     PreloadScene,
     TitleScene,
     MarketScene,
+    JourneyMapScene,
     DreamingScene,
     PreDepartureScene,
     InTransitScene,

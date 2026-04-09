@@ -16,6 +16,7 @@ import { GAME_CONFIG } from '@/config/game';
 import { PreloadScene } from '@/scenes/PreloadScene';
 import { TitleScene } from '@/scenes/TitleScene';
 import { MarketScene } from '@/scenes/MarketScene';
+import { JourneyMapScene } from '@/scenes/JourneyMapScene';
 import { DreamingScene } from '@/scenes/DreamingScene';
 import { PreDepartureScene } from '@/scenes/PreDepartureScene';
 import { InTransitScene } from '@/scenes/InTransitScene';
@@ -30,6 +31,7 @@ const ALL_SCENES = [
   PreloadScene,
   TitleScene,
   MarketScene,
+  JourneyMapScene,
   DreamingScene,
   PreDepartureScene,
   InTransitScene,
@@ -42,9 +44,9 @@ const ALL_SCENES = [
 ];
 
 describe('GAME_CONFIG', () => {
-  it('has all 12 scenes registered', () => {
+  it('has all 13 scenes registered', () => {
     const scenes = GAME_CONFIG.scene as unknown[];
-    expect(scenes).toHaveLength(12);
+    expect(scenes).toHaveLength(13);
   });
 
   it('scenes are in correct order', () => {
