@@ -265,9 +265,7 @@ export class MarketScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => {
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        // Future: this.scene.start('DreamingScene');
-        // For now, restart MarketScene as placeholder
-        this.scene.start('MarketScene');
+        this.scene.start('DreamingScene');
       });
     });
   }

@@ -3,7 +3,7 @@ import { TravelPhase, PersonaId } from '../../../shared/types';
 import { JOURNEY_PHASES } from '@/data/journeyPhases';
 import { PERSONAS } from '@/data/personas';
 import { COMPETITORS } from '@/data/competitors';
-import { HYPOTHESES, GTM_MOTIONS } from '@/data/strategy';
+import { HYPOTHESES, GTM_MOTIONS, COMPETITIVE_POSITIONING } from '@/data/strategy';
 import { MARKET_SEGMENTS, TAM } from '@/data/market';
 
 const ALL_PERSONA_IDS = Object.values(PersonaId);
@@ -131,5 +131,31 @@ describe('Strategy', () => {
     const partnership = GTM_MOTIONS.find((g) => g.name.includes('Partnership'));
     expect(partnership).toBeDefined();
     expect(partnership!.fitScore).toBe(5);
+  });
+
+  it('every hypothesis has all 4 scores between 1-10', () => {
+    for (const h of HYPOTHESES) {
+      for (const key of ['defensibility', 'revenue', 'feasibility', 'moat'] as const) {
+        const val = h.scores[key];
+        expect(val, `${h.id} ${key}`).toBeGreaterThanOrEqual(1);
+        expect(val, `${h.id} ${key}`).toBeLessThanOrEqual(10);
+      }
+    }
+  });
+
+  it('every GTM motion has fitScore between 1-5', () => {
+    for (const m of GTM_MOTIONS) {
+      expect(m.fitScore, m.name).toBeGreaterThanOrEqual(1);
+      expect(m.fitScore, m.name).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('COMPETITIVE_POSITIONING has 4 headoutBarrier and 4 atlysBarrier entries', () => {
+    expect(COMPETITIVE_POSITIONING.headoutBarrier).toHaveLength(4);
+    expect(COMPETITIVE_POSITIONING.atlysBarrier).toHaveLength(4);
+  });
+
+  it('COMPETITIVE_POSITIONING.window is non-empty', () => {
+    expect(COMPETITIVE_POSITIONING.window).toBeTruthy();
   });
 });

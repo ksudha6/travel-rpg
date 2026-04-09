@@ -5,25 +5,53 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('phaser', () => {
   const Scale = { FIT: 1, CENTER_BOTH: 1 };
   const AUTO = 0;
+  const Math = { Between: () => 0, FloatBetween: () => 0 };
   class Scene {
     constructor(_config: unknown) {}
   }
-  return { default: { AUTO, Scale, Scene } };
+  return { default: { AUTO, Scale, Scene, Math } };
 });
 
 import { GAME_CONFIG } from '@/config/game';
+import { PreloadScene } from '@/scenes/PreloadScene';
 import { TitleScene } from '@/scenes/TitleScene';
 import { MarketScene } from '@/scenes/MarketScene';
+import { DreamingScene } from '@/scenes/DreamingScene';
+import { PreDepartureScene } from '@/scenes/PreDepartureScene';
+import { InTransitScene } from '@/scenes/InTransitScene';
+import { OnGroundScene } from '@/scenes/OnGroundScene';
+import { PostTripScene } from '@/scenes/PostTripScene';
+import { HypothesesScene } from '@/scenes/HypothesesScene';
+import { CompetitiveScene } from '@/scenes/CompetitiveScene';
+import { GTMScene } from '@/scenes/GTMScene';
+import { PunchlineScene } from '@/scenes/PunchlineScene';
+
+const ALL_SCENES = [
+  PreloadScene,
+  TitleScene,
+  MarketScene,
+  DreamingScene,
+  PreDepartureScene,
+  InTransitScene,
+  OnGroundScene,
+  PostTripScene,
+  HypothesesScene,
+  CompetitiveScene,
+  GTMScene,
+  PunchlineScene,
+];
 
 describe('GAME_CONFIG', () => {
-  it('has TitleScene registered', () => {
+  it('has all 12 scenes registered', () => {
     const scenes = GAME_CONFIG.scene as unknown[];
-    expect(scenes).toContain(TitleScene);
+    expect(scenes).toHaveLength(12);
   });
 
-  it('has MarketScene registered', () => {
+  it('scenes are in correct order', () => {
     const scenes = GAME_CONFIG.scene as unknown[];
-    expect(scenes).toContain(MarketScene);
+    ALL_SCENES.forEach((scene, i) => {
+      expect(scenes[i], `scene at index ${i}`).toBe(scene);
+    });
   });
 
   it('canvas is 1280x720', () => {
