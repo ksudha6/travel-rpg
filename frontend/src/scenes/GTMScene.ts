@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GTM_MOTIONS } from '@/data/strategy';
-import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText, addRestartButton } from '@/ui/sceneConstants';
+import { COLORS, TEXT, FONT, ANCHOR, typeText, TypewriterText, addRestartButton } from '@/ui/sceneConstants';
+import { drawSceneBackground } from '@/ui/backgrounds';
+import { PersonaId } from '../../../shared/types';
 
 export class GTMScene extends Phaser.Scene {
   private currentBeat = 0;
@@ -21,8 +23,21 @@ export class GTMScene extends Phaser.Scene {
       this.activeTypewriter = null;
       this.transitioning = false;
 
-      drawPixelGrid(this, width, height);
+      drawSceneBackground(this, this.scene.key);
       addRestartButton(this);
+
+      // Character + Savi observing from left
+      const groundY = height * ANCHOR.GROUND_Y;
+      const personaId = this.registry.get('selectedPersona') as PersonaId;
+      if (personaId) {
+        this.add.image(width * ANCHOR.LEFT, groundY, `char_${personaId}`)
+          .setScale(0.14).setOrigin(0.5, 1).setAlpha(0.7);
+      }
+      if (this.registry.get('saviActive')) {
+        this.add.image(width * ANCHOR.LEFT - 50, groundY, 'char_savi')
+          .setScale(0.10).setOrigin(0.5, 1).setAlpha(0.7);
+      }
+
       this.showBeat();
 
       this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {

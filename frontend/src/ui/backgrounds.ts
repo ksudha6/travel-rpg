@@ -31,29 +31,6 @@ export function drawGarden(scene: Phaser.Scene): void {
   gfx.fillStyle(0x5a7a5a, 0.4);
   gfx.fillRect(W / 2 - 30, GROUND, 60, H - GROUND);
 
-  // 7 garden plot outlines (two rows: 4 top, 3 bottom)
-  gfx.lineStyle(2, 0x4a8a5a, 0.6);
-  const plotW = 120;
-  const plotH = 60;
-  const topY = GROUND + 20;
-  const botY = GROUND + 100;
-
-  // Top row: 4 plots
-  for (let i = 0; i < 4; i++) {
-    const px = 100 + i * (plotW + 60);
-    gfx.fillStyle(0x1a3a2a, 0.4);
-    gfx.fillRect(px, topY, plotW, plotH);
-    gfx.strokeRect(px, topY, plotW, plotH);
-  }
-
-  // Bottom row: 3 plots
-  for (let i = 0; i < 3; i++) {
-    const px = 200 + i * (plotW + 80);
-    gfx.fillStyle(0x1a3a2a, 0.4);
-    gfx.fillRect(px, botY, plotW, plotH);
-    gfx.strokeRect(px, botY, plotW, plotH);
-  }
-
   // Pixel trees at edges
   drawTree(gfx, 40, GROUND);
   drawTree(gfx, 1220, GROUND);
@@ -287,30 +264,54 @@ export function drawBoardroom(scene: Phaser.Scene): void {
   gfx.fillRect(W / 2 + 272, GROUND + 70, 8, 50);
 }
 
+// ── Phase scene background ────────────────────────────────
+// Clean, minimal — just sky + ground. Phase scenes add their own
+// buildings, power-ups, and characters on top.
+
+export function drawPhaseBackground(scene: Phaser.Scene): void {
+  const gfx = scene.add.graphics();
+
+  // Dark sky
+  gfx.fillStyle(0x0c1020, 1);
+  gfx.fillRect(0, 0, W, GROUND);
+
+  // Subtle horizon glow
+  gfx.fillStyle(0x141830, 0.6);
+  gfx.fillRect(0, GROUND - 60, W, 60);
+
+  // Ground
+  gfx.fillStyle(0x1a1a2a, 1);
+  gfx.fillRect(0, GROUND, W, H - GROUND);
+
+  // Ground line accent
+  gfx.fillStyle(0x2a2a4a, 0.6);
+  gfx.fillRect(0, GROUND, W, 3);
+}
+
 // ── Scene-to-background mapping ───────────────────────────
 
 export function drawSceneBackground(scene: Phaser.Scene, sceneName: string): void {
   switch (sceneName) {
     case 'TitleScene':
-    case 'PreDepartureScene':
-    case 'InTransitScene':
       drawAirportTerminal(scene);
       break;
     case 'MarketScene':
-    case 'DreamingScene':
-    case 'PunchlineScene':
       drawGarden(scene);
       break;
+    case 'DreamingScene':
+    case 'PreDepartureScene':
+    case 'InTransitScene':
     case 'OnGroundScene':
-      drawCityStreet(scene);
-      break;
     case 'PostTripScene':
-      drawHome(scene);
+      drawPhaseBackground(scene);
       break;
     case 'HypothesesScene':
     case 'CompetitiveScene':
     case 'GTMScene':
       drawBoardroom(scene);
+      break;
+    case 'PunchlineScene':
+      drawGarden(scene);
       break;
     default:
       drawGarden(scene);
