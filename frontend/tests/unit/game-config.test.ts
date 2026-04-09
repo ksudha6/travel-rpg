@@ -13,11 +13,17 @@ vi.mock('phaser', () => {
 
 import { GAME_CONFIG } from '@/config/game';
 import { TitleScene } from '@/scenes/TitleScene';
+import { MarketScene } from '@/scenes/MarketScene';
 
 describe('GAME_CONFIG', () => {
   it('has TitleScene registered', () => {
     const scenes = GAME_CONFIG.scene as unknown[];
     expect(scenes).toContain(TitleScene);
+  });
+
+  it('has MarketScene registered', () => {
+    const scenes = GAME_CONFIG.scene as unknown[];
+    expect(scenes).toContain(MarketScene);
   });
 
   it('canvas is 1280x720', () => {

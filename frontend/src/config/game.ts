@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { TitleScene } from '../scenes/TitleScene';
+import { MarketScene } from '../scenes/MarketScene';
 
 export const GAME_CONFIG: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -12,7 +13,7 @@ export const GAME_CONFIG: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [TitleScene],
+  scene: [TitleScene, MarketScene],
   physics: {
     default: 'arcade',
     arcade: {

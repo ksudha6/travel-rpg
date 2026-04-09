@@ -26,6 +26,26 @@ export class TitleScene extends Phaser.Scene {
           align: 'center',
         })
         .setOrigin(0.5);
+
+      const prompt = this.add
+        .text(width / 2, height / 2 + 100, 'Click to begin', {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: '#666666',
+          align: 'center',
+        })
+        .setOrigin(0.5);
+
+      this.tweens.add({
+        targets: prompt,
+        alpha: { from: 0.3, to: 1 },
+        duration: 1000,
+        yoyo: true,
+        repeat: -1,
+      });
+
+      this.input.once('pointerdown', () => this.advance());
+      this.input.keyboard?.once('keydown-SPACE', () => this.advance());
     } catch (error) {
       console.error('TitleScene failed to create:', error);
       const { width, height } = this.scale;
@@ -37,5 +57,12 @@ export class TitleScene extends Phaser.Scene {
         })
         .setOrigin(0.5);
     }
+  }
+
+  private advance(): void {
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('MarketScene');
+    });
   }
 }
