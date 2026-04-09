@@ -4,14 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Atlys Travel Experience</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    body {
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 24px;
+      font-family: 'Press Start 2P', monospace;
+      color: #666666;
+    }
     #game-container { width: 1280px; max-width: 100vw; aspect-ratio: 16/9; }
+    #page-footer {
+      width: 1280px;
+      max-width: 100vw;
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 8px;
+      font-size: 9px;
+      line-height: 1.6;
+    }
+    #page-footer a { color: #22c55e; text-decoration: none; }
   </style>
 </head>
 <body>
   <div id="game-container"></div>
+  <div id="page-footer">
+    <div id="instructions">
+      CLICK or SPACE &mdash; advance &nbsp;|&nbsp; pick a character to start the journey
+    </div>
+    <div id="about">
+      Built by Kavya &nbsp;&middot;&nbsp; Powered by Phaser 3 + Claude Code
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

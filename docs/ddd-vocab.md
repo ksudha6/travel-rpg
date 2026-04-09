@@ -16,5 +16,10 @@ Use these terms consistently in code, commits, and iteration notes.
 | **Boutique** | Headout's model: curated, trust-building, delightful UX, narrow scope | Competitor.model |
 | **Supermarket** | Klook's model: massive catalog, scale, price competitiveness, broad scope | Competitor.model |
 | **Companion** | Atlys's target positioning: full-journey, relationship-based, trust + data | Positioning quadrant |
+| **Savi** | The Atlys companion character — a green guide sprite personifying the product. Appears when Atlys enters the user's flow, walks alongside persona from that point on. Name from "savari" (Hindi: journey) | Future sprite asset |
+| **Beat** | One narrative moment in a scene — a single thought, reveal, or visual change. Click/space advances between beats. | `BasePhaseScene` step system |
+| **Typewriter** | RPG-style text reveal: characters type in one at a time. Click during typing skips to full text. | `typeText()` utility |
+| **Pixel Grid** | Simple dark background with subtle 64px grid lines — consistent across all scenes | `drawPixelGrid()` utility |
 | **Scene** | A Phaser scene = one screen/act of the presentation | Phaser.Scene subclass |
 | **Act** | A narrative section of the presentation (7 total) | Maps to 1+ scenes |
+| **Leverage Hierarchy** | Phases ranked by Atlys's current ability to act: Pre-Departure + Zero Hour = real today; Dreaming + Post-Trip = needs partnerships; On-Ground = integrate don't build | Narration ordering principle |

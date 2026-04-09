@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { COMPETITIVE_POSITIONING } from '@/data/strategy';
-import { COLORS, TEXT, FONT } from '@/ui/sceneConstants';
+import { COLORS, TEXT, FONT, typeText, drawPixelGrid, TypewriterText } from '@/ui/sceneConstants';
 
 export class CompetitiveScene extends Phaser.Scene {
-  private currentStep = 0;
-  private stepObjects: Phaser.GameObjects.GameObject[] = [];
+  private currentBeat = 0;
+  private beatObjects: Phaser.GameObjects.GameObject[] = [];
+  private activeTypewriter: TypewriterText | null = null;
   private transitioning = false;
 
   constructor() {
@@ -14,40 +15,31 @@ export class CompetitiveScene extends Phaser.Scene {
   create(): void {
     try {
       this.cameras.main.fadeIn(500, 0, 0, 0);
-      this.currentStep = 0;
-      this.stepObjects = [];
+      const { width, height } = this.scale;
+      this.currentBeat = 0;
+      this.beatObjects = [];
+      this.activeTypewriter = null;
       this.transitioning = false;
-      this.showStep();
 
-      this.input.on('pointerdown', () => this.advanceStep());
-      this.input.keyboard?.on('keydown-SPACE', () => this.advanceStep());
+      drawPixelGrid(this, width, height);
+      this.showBeat();
+
+      this.input.on('pointerdown', () => this.handleClick());
+      this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('CompetitiveScene failed to create:', error);
       const { width, height } = this.scale;
-      this.add
-        .text(width / 2, height / 2, 'Something went wrong.', {
-          fontFamily: FONT,
-          fontSize: '24px',
-          color: TEXT.RED,
-        })
-        .setOrigin(0.5);
+      this.add.text(width / 2, height / 2, 'Something went wrong.', {
+        fontFamily: FONT, fontSize: '10px', color: TEXT.RED,
+      }).setOrigin(0.5);
     }
   }
 
-  private track<T extends Phaser.GameObjects.GameObject>(obj: T): T {
-    this.stepObjects.push(obj);
-    return obj;
-  }
-
-  private clearStep(): void {
-    this.stepObjects.forEach((obj) => obj.destroy());
-    this.stepObjects = [];
-  }
-
-  private advanceStep(): void {
+  private handleClick(): void {
     if (this.transitioning) return;
-    this.currentStep++;
-    if (this.currentStep > 2) {
+    if (this.activeTypewriter?.skipTyping()) return;
+    this.currentBeat++;
+    if (this.currentBeat > 3) {
       this.transitioning = true;
       this.input.removeAllListeners();
       this.input.keyboard?.removeAllListeners();
@@ -57,286 +49,152 @@ export class CompetitiveScene extends Phaser.Scene {
       });
       return;
     }
-    this.clearStep();
-    this.showStep();
+    this.clearBeat();
+    this.showBeat();
   }
 
-  private showStep(): void {
+  private clearBeat(): void {
+    this.activeTypewriter = null;
+    this.beatObjects.forEach((obj) => obj.destroy());
+    this.beatObjects = [];
+  }
+
+  private track<T extends Phaser.GameObjects.GameObject>(obj: T): T {
+    this.beatObjects.push(obj);
+    return obj;
+  }
+
+  private showBeat(): void {
     const { width, height } = this.scale;
-    switch (this.currentStep) {
-      case 0:
-        this.renderMatrix(width, height);
-        break;
-      case 1:
-        this.renderBarriers(width, height);
-        break;
-      case 2:
-        this.renderWindow(width, height);
-        break;
+    switch (this.currentBeat) {
+      case 0: this.beatMatrix(width, height); break;
+      case 1: this.beatBarriers(width, height); break;
+      case 2: this.beatWindow(width, height); break;
+      case 3: this.beatAdvance(width, height); break;
     }
   }
 
-  // ── Step 0: 2x2 Competitive Matrix ───────────────────────────
+  // ── Beat 0: 2x2 Matrix ──────────────────────────────────────
 
-  private renderMatrix(width: number, height: number): void {
-    this.track(
-      this.add
-        .text(width / 2, 18, 'The Competitive Truth', {
-          fontFamily: FONT,
-          fontSize: '24px',
-          color: TEXT.WHITE,
-        })
-        .setOrigin(0.5, 0),
-    );
+  private beatMatrix(width: number, height: number): void {
+    this.track(this.add.text(width / 2, 15, 'The Competitive Truth', {
+      fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE,
+    }).setOrigin(0.5, 0));
 
-    // Matrix dimensions
-    const mW = 800;
-    const mH = 440;
+    const mW = 700;
+    const mH = 380;
     const mX = width / 2 - mW / 2;
-    const mY = 70;
+    const mY = 60;
     const midX = mX + mW / 2;
     const midY = mY + mH / 2;
 
-    // Draw axes
     const gfx = this.track(this.add.graphics());
-    gfx.lineStyle(2, 0x444444);
-    // Vertical divider
+    gfx.lineStyle(1, 0x444444);
     gfx.lineBetween(midX, mY, midX, mY + mH);
-    // Horizontal divider
     gfx.lineBetween(mX, midY, mX + mW, midY);
-    // Border
     gfx.lineStyle(1, 0x333333);
     gfx.strokeRect(mX, mY, mW, mH);
 
     // Axis labels
-    this.track(
-      this.add
-        .text(width / 2, mY + mH + 10, 'Single Phase  ←→  Full Journey', {
-          fontFamily: FONT,
-          fontSize: '13px',
-          color: TEXT.SUB,
-        })
-        .setOrigin(0.5, 0),
-    );
+    this.track(this.add.text(width / 2, mY + mH + 8, 'Single Phase  ---  Full Journey', {
+      fontFamily: FONT, fontSize: '7px', color: TEXT.SUB,
+    }).setOrigin(0.5, 0));
 
-    this.track(
-      this.add
-        .text(mX - 12, midY, 'Transactional\n     ↑\nCompanion', {
-          fontFamily: FONT,
-          fontSize: '11px',
-          color: TEXT.SUB,
-          align: 'center',
-        })
-        .setOrigin(1, 0.5),
-    );
+    this.track(this.add.text(mX - 8, midY, 'Transactional\n     |\nCompanion', {
+      fontFamily: FONT, fontSize: '6px', color: TEXT.SUB, align: 'right',
+    }).setOrigin(1, 0.5));
 
-    // Competitor placements
-    const competitors = [
-      { name: 'MakeMyTrip', x: mX + mW * 0.25, y: midY + mH * 0.2 },
-      { name: 'iVisa', x: mX + mW * 0.15, y: midY + mH * 0.35 },
-      { name: 'Headout', x: mX + mW * 0.35, y: midY + mH * 0.15 },
-      { name: 'EaseMyTrip', x: mX + mW * 0.3, y: midY + mH * 0.3 },
-      { name: 'ChatGPT', x: mX + mW * 0.2, y: midY - mH * 0.2 },
+    // Competitors in bottom-left (transactional, single phase)
+    const placements = [
+      { name: 'MakeMyTrip', x: mX + mW * 0.22, y: midY + mH * 0.18 },
+      { name: 'iVisa', x: mX + mW * 0.12, y: midY + mH * 0.32 },
+      { name: 'Headout', x: mX + mW * 0.35, y: midY + mH * 0.12 },
+      { name: 'ChatGPT', x: mX + mW * 0.18, y: midY - mH * 0.18 },
     ];
 
-    competitors.forEach((c) => {
-      this.track(this.add.circle(c.x, c.y, 8, 0x666666, 0.8));
-      this.track(
-        this.add
-          .text(c.x + 12, c.y - 6, c.name, {
-            fontFamily: FONT,
-            fontSize: '10px',
-            color: '#999999',
-          }),
-      );
+    placements.forEach((c) => {
+      this.track(this.add.circle(c.x, c.y, 6, 0x666666, 0.8));
+      this.track(this.add.text(c.x + 10, c.y - 5, c.name, {
+        fontFamily: FONT, fontSize: '6px', color: '#888888',
+      }));
     });
 
-    // Top-right quadrant — ATLYS opportunity (empty, glowing)
-    const trX = midX;
-    const trY = mY;
-    const trW = mW / 2;
-    const trH = mH / 2;
+    // Top-right: ATLYS opportunity
+    const trX = midX + 5;
+    const trY = mY + 5;
+    const trW = mW / 2 - 10;
+    const trH = mH / 2 - 10;
 
-    const glowRect = this.track(
-      this.add
-        .rectangle(trX + trW / 2, trY + trH / 2, trW - 10, trH - 10, 0x0a2a0a, 0.3)
+    const glow = this.track(
+      this.add.rectangle(trX + trW / 2, trY + trH / 2, trW, trH, 0x0a2a0a, 0.3)
         .setStrokeStyle(2, COLORS.ATLYS_GREEN),
     );
+    this.tweens.add({ targets: glow, alpha: { from: 0.2, to: 0.5 }, duration: 1000, yoyo: true, repeat: -1 });
 
-    this.tweens.add({
-      targets: glowRect,
-      alpha: { from: 0.2, to: 0.5 },
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-    });
+    this.track(this.add.text(trX + trW / 2, trY + trH / 2, 'ATLYS?', {
+      fontFamily: FONT, fontSize: '12px', color: TEXT.GREEN,
+    }).setOrigin(0.5));
 
-    this.track(
-      this.add
-        .text(trX + trW / 2, trY + trH / 2 - 10, '★ ATLYS?', {
-          fontFamily: FONT,
-          fontSize: '20px',
-          color: TEXT.GREEN,
-          fontStyle: 'bold',
-        })
-        .setOrigin(0.5),
+    // Narration below
+    const tw = typeText(this, width / 2, mY + mH + 30,
+      'Nobody owns the Full Journey + Companion quadrant.',
+      { fontFamily: FONT, fontSize: '8px', color: TEXT.WHITE },
     );
-
-    this.track(
-      this.add
-        .text(trX + trW / 2, trY + trH / 2 + 16, 'Nobody is here.', {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: TEXT.GREEN,
-        })
-        .setOrigin(0.5),
-    );
-
-    // Bottom text
-    this.track(
-      this.add
-        .text(
-          width / 2,
-          mY + mH + 36,
-          'Nobody owns the Full Journey + Companion quadrant.',
-          {
-            fontFamily: FONT,
-            fontSize: '16px',
-            color: TEXT.WHITE,
-          },
-        )
-        .setOrigin(0.5, 0),
-    );
-
-    // Prompt
-    const prompt = this.track(
-      this.add
-        .text(width / 2, height - 30, 'Click to continue', {
-          fontFamily: FONT,
-          fontSize: '14px',
-          color: TEXT.MUTED,
-        })
-        .setOrigin(0.5),
-    );
-    this.tweens.add({ targets: prompt, alpha: { from: 0.3, to: 1 }, duration: 1000, yoyo: true, repeat: -1 });
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
   }
 
-  // ── Step 1: Barriers ─────────────────────────────────────────
+  // ── Beat 1: Barriers ────────────────────────────────────────
 
-  private renderBarriers(width: number, height: number): void {
-    const colW = 540;
-    const gap = 40;
-    const leftX = width / 2 - colW - gap / 2;
-    const rightX = width / 2 + gap / 2;
+  private beatBarriers(width: number, height: number): void {
+    const colW = 500;
+    const leftX = width / 2 - colW - 20;
+    const rightX = width / 2 + 20;
 
-    // Left column: Headout barriers
-    this.track(
-      this.add.text(leftX, 20, "Why Headout Can't Add Visas", {
-        fontFamily: FONT,
-        fontSize: '16px',
-        color: TEXT.RED,
-        fontStyle: 'bold',
-      }),
-    );
+    this.track(this.add.text(leftX, 20, "Why Headout can't\nadd visas", {
+      fontFamily: FONT, fontSize: '9px', color: TEXT.RED, lineSpacing: 6,
+    }));
 
     COMPETITIVE_POSITIONING.headoutBarrier.forEach((item, i) => {
-      this.track(
-        this.add.text(leftX, 55 + i * 80, `${i + 1}.`, {
-          fontFamily: FONT,
-          fontSize: '13px',
-          color: TEXT.RED,
-          fontStyle: 'bold',
-        }),
-      );
-      this.track(
-        this.add.text(leftX + 24, 55 + i * 80, item, {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: '#dddddd',
-          wordWrap: { width: colW - 30 },
-        }),
-      );
+      this.track(this.add.text(leftX, 65 + i * 60, `${i + 1}. ${item}`, {
+        fontFamily: FONT, fontSize: '6px', color: '#dddddd', wordWrap: { width: colW },
+      }));
     });
 
-    // Right column: Atlys barriers
-    this.track(
-      this.add.text(rightX, 20, "Why Atlys Can't Just Add Activities", {
-        fontFamily: FONT,
-        fontSize: '16px',
-        color: '#f59e0b',
-        fontStyle: 'bold',
-      }),
-    );
+    this.track(this.add.text(rightX, 20, "Why Atlys can't just\nadd activities", {
+      fontFamily: FONT, fontSize: '9px', color: '#f59e0b', lineSpacing: 6,
+    }));
 
     COMPETITIVE_POSITIONING.atlysBarrier.forEach((item, i) => {
-      this.track(
-        this.add.text(rightX, 55 + i * 80, `${i + 1}.`, {
-          fontFamily: FONT,
-          fontSize: '13px',
-          color: '#f59e0b',
-          fontStyle: 'bold',
-        }),
-      );
-      this.track(
-        this.add.text(rightX + 24, 55 + i * 80, item, {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: '#dddddd',
-          wordWrap: { width: colW - 30 },
-        }),
-      );
+      this.track(this.add.text(rightX, 65 + i * 60, `${i + 1}. ${item}`, {
+        fontFamily: FONT, fontSize: '6px', color: '#dddddd', wordWrap: { width: colW },
+      }));
     });
-
-    // Prompt
-    const prompt = this.track(
-      this.add
-        .text(width / 2, height - 30, 'Click to continue', {
-          fontFamily: FONT,
-          fontSize: '14px',
-          color: TEXT.MUTED,
-        })
-        .setOrigin(0.5),
-    );
-    this.tweens.add({ targets: prompt, alpha: { from: 0.3, to: 1 }, duration: 1000, yoyo: true, repeat: -1 });
   }
 
-  // ── Step 2: The 18-Month Window ──────────────────────────────
+  // ── Beat 2: The 18-Month Window ─────────────────────────────
 
-  private renderWindow(width: number, height: number): void {
-    this.track(
-      this.add
-        .text(width / 2, height / 2 - 80, 'The 18-Month Window', {
-          fontFamily: FONT,
-          fontSize: '28px',
-          color: TEXT.WHITE,
-        })
-        .setOrigin(0.5),
+  private beatWindow(width: number, height: number): void {
+    this.track(this.add.text(width / 2, height / 2 - 60, 'The 18-Month Window', {
+      fontFamily: FONT, fontSize: '12px', color: TEXT.WHITE,
+    }).setOrigin(0.5));
+
+    const tw = typeText(this, width / 2, height / 2,
+      COMPETITIVE_POSITIONING.window,
+      { fontFamily: FONT, fontSize: '9px', color: TEXT.GREEN, align: 'center', wordWrap: { width: 800 } },
     );
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
+  }
 
-    const windowText = this.track(
-      this.add
-        .text(width / 2, height / 2, COMPETITIVE_POSITIONING.window, {
-          fontFamily: FONT,
-          fontSize: '18px',
-          color: TEXT.GREEN,
-          align: 'center',
-          wordWrap: { width: 900 },
-        })
-        .setOrigin(0.5)
-        .setAlpha(0),
-    );
+  // ── Beat 3: Advance ─────────────────────────────────────────
 
-    this.tweens.add({ targets: windowText, alpha: 1, duration: 800 });
-
-    const prompt = this.track(
-      this.add
-        .text(width / 2, height - 50, '→ Next: Go-To-Market', {
-          fontFamily: FONT,
-          fontSize: '16px',
-          color: TEXT.GREEN,
-        })
-        .setOrigin(0.5),
-    );
+  private beatAdvance(width: number, height: number): void {
+    const prompt = this.track(this.add.text(width / 2, height / 2, '→ Go-To-Market', {
+      fontFamily: FONT, fontSize: '10px', color: TEXT.GREEN,
+    }).setOrigin(0.5));
     this.tweens.add({ targets: prompt, alpha: { from: 0.4, to: 1 }, duration: 1000, yoyo: true, repeat: -1 });
   }
 }

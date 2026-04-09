@@ -1,22 +1,28 @@
 # Iteration 08
 **Date started:** 2026-04-09
 **Bounded context:** Strategy + Presentation
-**Status:** in-progress
+**Status:** completed
 
 ## Context
-After the 5 journey phases, the presentation shifts to strategic analysis: 3 hypotheses, competitive positioning matrix, GTM motions, and the final punchline. All data from strategy.ts.
+Journey phase scenes complete. Strategy scenes (Hypotheses, Competitive, GTM) and PunchlineScene built.
 
 ## JTBD
-When I finish the journey phases, I want to see the strategic synthesis — hypotheses scored honestly, competitive positioning mapped, GTM paths visualized, and a compelling punchline — so the full argument lands.
+When I finish the journey phases, I want to see the strategic synthesis — hypotheses, competitive positioning, GTM paths, and final punchline — presented as narration, not dashboards.
 
 ## Acceptance Criteria
-- [ ] HypothesesScene shows 3 cards with scoring bars, H2 glows brightest
-- [ ] CompetitiveScene shows 2x2 matrix with empty top-right quadrant
-- [ ] GTMScene shows 3 GTM paths with partnership as highest-fit
-- [ ] PunchlineScene shows final text sequence with character walking the path
+- [x] HypothesesScene: narrated intro → 3 cards with scores → honesty line
+- [x] CompetitiveScene: 2x2 matrix → barriers → 18-month window
+- [x] GTMScene: narrated intro → 3 motion cards → "Atlys Inside"
+- [x] PunchlineScene: 6 timed text reveals → fade to "Thank you"
 
 ## Tasks
-- [ ] Create HypothesesScene.ts (3 hypothesis cards + scores)
-- [ ] Create CompetitiveScene.ts (2x2 matrix + barriers)
-- [ ] Create GTMScene.ts (3 GTM motions)
-- [ ] Create PunchlineScene.ts (final text sequence)
+- [x] Create HypothesesScene.ts (3-beat: intro → cards → honesty)
+- [x] Create CompetitiveScene.ts (4-beat: matrix → barriers → window → advance)
+- [x] Create GTMScene.ts (3-beat: intro → cards → Atlys Inside)
+- [x] Create PunchlineScene.ts (timed auto-reveal sequence)
+
+## Decision Summary
+Strategy scenes use beat-based narration with typewriter intros before showing data. CompetitiveScene is the most complex (4 beats including 2x2 matrix and barrier analysis). PunchlineScene auto-reveals lines on a timer with click-to-skip. All scenes use pixel grid background and Press Start 2P font.
+
+## Carried Forward
+None

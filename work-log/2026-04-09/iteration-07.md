@@ -1,24 +1,27 @@
 # Iteration 07
 **Date started:** 2026-04-09
 **Bounded context:** Journey
-**Status:** in-progress
+**Status:** completed
 
 ## Context
-Building all 5 journey phase scenes in parallel. Each phase follows the same scrollytelling structure: tagline → competitors → persona anxiety → hook → Atlys play → advance. All data comes from journeyPhases.ts. Selected persona from registry.
+All scenes built in parallel in a single sprint (iterations 06-09 executed simultaneously). BasePhaseScene abstract class created for 5 journey phase scenes.
 
 ## JTBD
-When I select a character and start the journey, I want to walk through all 5 travel phases seeing competitors, pain points, and Atlys's unique plays, so the strategic argument builds scene by scene.
+When I select a character, I want to walk through all 5 travel phases seeing the narrative beats — tagline, competitors, anxiety, hook, Atlys play — so the strategic argument builds scene by scene.
 
 ## Acceptance Criteria
-- [ ] DreamingScene renders with correct phase data and transitions to PreDepartureScene
-- [ ] PreDepartureScene renders and transitions to InTransitScene
-- [ ] InTransitScene renders (most dramatic — Zero Hour) and transitions to OnGroundScene
-- [ ] OnGroundScene renders and transitions to PostTripScene
-- [ ] PostTripScene renders with flywheel visual and transitions to HypothesesScene
+- [x] BasePhaseScene implements beat-based narration (6 beats per phase)
+- [x] DreamingScene → PreDepartureScene → InTransitScene → OnGroundScene → PostTripScene chain works
+- [x] InTransitScene has darker competitor color (Zero Hour)
+- [x] All 5 concrete scenes extend BasePhaseScene correctly
 
 ## Tasks
-- [ ] Create DreamingScene.ts (Phase 1)
-- [ ] Create PreDepartureScene.ts (Phase 2)
-- [ ] Create InTransitScene.ts (Phase 3 — Zero Hour)
-- [ ] Create OnGroundScene.ts (Phase 4)
-- [ ] Create PostTripScene.ts (Phase 5 + flywheel)
+- [x] Create sceneConstants.ts (shared colors, pixel font, typewriter utility)
+- [x] Create BasePhaseScene.ts (abstract beat-based narration engine)
+- [x] Create 5 concrete phase scenes (Dreaming through PostTrip)
+
+## Decision Summary
+Built BasePhaseScene as abstract class with 6-beat narration: tagline → standard world → persona anxiety → hook → Atlys play → advance. Each concrete scene is ~15 lines extending the base. Typewriter text effect added for RPG dialogue feel. InTransitScene overrides competitor color to near-black for Zero Hour drama. Initially built as data dashboards (cards/rectangles) — redesigned to narration-first after user feedback.
+
+## Carried Forward
+None

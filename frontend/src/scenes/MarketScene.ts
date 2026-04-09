@@ -2,21 +2,31 @@ import Phaser from 'phaser';
 import { TAM, MARKET_SEGMENTS } from '@/data/market';
 import { PERSONAS } from '@/data/personas';
 import { PersonaId } from '../../../shared/types';
+import {
+  TEXT,
+  FONT,
+  typeText,
+  drawPixelGrid,
+  TypewriterText,
+} from '@/ui/sceneConstants';
 
-// Garden plot colors per segment
-const SEGMENT_COLORS: Record<string, number> = {
-  Flights: 0x3b82f6,
-  Hotels: 0x8b5cf6,
-  'Activities/Experiences': 0xf59e0b,
-  'Ground Transport': 0xef4444,
-  'Travel Insurance': 0x6366f1,
-  Visas: 0x22c55e,
-  'Food/Dining': 0xf97316,
-};
-
-const ATLYS_GREEN = 0x22c55e;
-
+/**
+ * MarketScene — "The Market Nobody Sees Whole" (STORY.md Act 1)
+ *
+ * Beat-based narration:
+ * 0: "₹18,00,000 crore."
+ * 1: "That's the Indian travel market by 2030."
+ * 2: 7 segments appear as a list, Visas glows green
+ * 3: "Atlys owns 1–2% of this pie. The other 98% is the journey."
+ * 4: 4 character sprites appear — "Pick your traveler."
+ * 5: Click a character → start journey
+ */
 export class MarketScene extends Phaser.Scene {
+  private currentBeat = 0;
+  private beatObjects: Phaser.GameObjects.GameObject[] = [];
+  private activeTypewriter: TypewriterText | null = null;
+  private characterSelectActive = false;
+
   constructor() {
     super({ key: 'MarketScene' });
   }
@@ -25,77 +35,141 @@ export class MarketScene extends Phaser.Scene {
     try {
       this.cameras.main.fadeIn(500, 0, 0, 0);
       const { width, height } = this.scale;
+      this.currentBeat = 0;
+      this.beatObjects = [];
+      this.activeTypewriter = null;
+      this.characterSelectActive = false;
 
-      this.renderHeadline(width);
-      this.renderGarden(width, height);
-      this.renderTagline(width, height);
-      this.renderCharacterCards(width, height);
+      drawPixelGrid(this, width, height);
+
+      this.showBeat();
+
+      this.input.on('pointerdown', () => this.handleClick());
+      this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error('MarketScene failed to create:', error);
       const { width, height } = this.scale;
       this.add
         .text(width / 2, height / 2, 'Something went wrong.', {
-          fontFamily: 'monospace',
-          fontSize: '24px',
-          color: '#ff4444',
+          fontFamily: FONT,
+          fontSize: '10px',
+          color: TEXT.RED,
         })
         .setOrigin(0.5);
     }
   }
 
-  private renderHeadline(width: number): void {
-    this.add
-      .text(width / 2, 30, `${TAM.currentINR}`, {
-        fontFamily: 'monospace',
-        fontSize: '36px',
-        color: '#ffffff',
-        align: 'center',
-      })
-      .setOrigin(0.5, 0);
+  private handleClick(): void {
+    if (this.characterSelectActive) return;
+    if (this.activeTypewriter?.skipTyping()) return;
 
-    this.add
-      .text(width / 2, 72, "That's the Indian travel market by 2030.", {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: '#aaaaaa',
-        align: 'center',
-      })
-      .setOrigin(0.5, 0);
+    this.currentBeat++;
+    if (this.currentBeat > 4) return; // beat 4 is character select, handled separately
+    this.clearBeat();
+    this.showBeat();
   }
 
-  private renderGarden(width: number, height: number): void {
-    const startY = 110;
-    const gardenHeight = height * 0.42;
-    const cols = 4;
-    const rows = 2;
-    const padX = 24;
-    const padY = 16;
-    const plotW = (width - padX * (cols + 1)) / cols;
-    const plotH = (gardenHeight - padY * (rows + 1)) / rows;
+  private clearBeat(): void {
+    this.activeTypewriter = null;
+    this.beatObjects.forEach((obj) => obj.destroy());
+    this.beatObjects = [];
+  }
+
+  private track<T extends Phaser.GameObjects.GameObject>(obj: T): T {
+    this.beatObjects.push(obj);
+    return obj;
+  }
+
+  private showBeat(): void {
+    const { width, height } = this.scale;
+    switch (this.currentBeat) {
+      case 0: this.beat0_Amount(width, height); break;
+      case 1: this.beat1_Context(width, height); break;
+      case 2: this.beat2_Segments(width, height); break;
+      case 3: this.beat3_AtlysPie(width, height); break;
+      case 4: this.beat4_CharacterSelect(width, height); break;
+    }
+  }
+
+  // ── Beat 0: The big number ───────────────────────────────────
+
+  private beat0_Amount(width: number, height: number): void {
+    const tw = typeText(this, width / 2, height / 2, TAM.currentINR, {
+      fontFamily: FONT,
+      fontSize: '18px',
+      color: TEXT.WHITE,
+    });
+    tw.setOrigin(0.5);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
+  }
+
+  // ── Beat 1: What the number means ────────────────────────────
+
+  private beat1_Context(width: number, height: number): void {
+    // Keep the big number
+    this.track(
+      this.add
+        .text(width / 2, height / 2 - 40, TAM.currentINR, {
+          fontFamily: FONT,
+          fontSize: '18px',
+          color: TEXT.WHITE,
+        })
+        .setOrigin(0.5),
+    );
+
+    const tw = typeText(
+      this,
+      width / 2,
+      height / 2 + 20,
+      "That's the Indian travel market by 2030.",
+      {
+        fontFamily: FONT,
+        fontSize: '9px',
+        color: TEXT.SUB,
+      },
+    );
+    tw.setOrigin(0.5);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
+  }
+
+  // ── Beat 2: Segments list ────────────────────────────────────
+
+  private beat2_Segments(width: number, height: number): void {
+    this.track(
+      this.add
+        .text(width / 2, 30, TAM.currentINR, {
+          fontFamily: FONT,
+          fontSize: '12px',
+          color: TEXT.MUTED,
+        })
+        .setOrigin(0.5, 0),
+    );
+
+    const startY = 90;
+    const lineH = 32;
 
     MARKET_SEGMENTS.forEach((seg, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = padX + col * (plotW + padX);
-      const y = startY + padY + row * (plotH + padY);
-      const color = SEGMENT_COLORS[seg.name] ?? 0x444444;
       const isAtlys = seg.atlysPresent;
+      const y = startY + i * lineH;
 
-      // Garden plot rectangle
-      const rect = this.add.rectangle(
-        x + plotW / 2,
-        y + plotH / 2,
-        plotW,
-        plotH,
-        color,
-        isAtlys ? 0.9 : 0.25,
+      // Segment name + size
+      const label = `${seg.name}  ${seg.marketSize2025}`;
+      const text = this.track(
+        this.add
+          .text(width / 2, y, isAtlys ? `★ ${label}  — ATLYS` : label, {
+            fontFamily: FONT,
+            fontSize: '8px',
+            color: isAtlys ? TEXT.GREEN : TEXT.SUB,
+          })
+          .setOrigin(0.5, 0),
       );
-      rect.setStrokeStyle(isAtlys ? 3 : 1, isAtlys ? ATLYS_GREEN : 0x555555);
 
-      // Pulse the Visas segment
+      // Pulse the Atlys segment
       if (isAtlys) {
         this.tweens.add({
-          targets: rect,
+          targets: text,
           alpha: { from: 0.7, to: 1 },
           duration: 800,
           yoyo: true,
@@ -103,166 +177,154 @@ export class MarketScene extends Phaser.Scene {
         });
       }
 
-      // Segment name
-      this.add
-        .text(x + plotW / 2, y + 12, seg.name, {
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: '#ffffff',
-          fontStyle: 'bold',
-          align: 'center',
-        })
-        .setOrigin(0.5, 0);
+      // Fade in each segment
+      text.setAlpha(0);
+      this.tweens.add({
+        targets: text,
+        alpha: isAtlys ? 1 : 0.8,
+        delay: i * 120,
+        duration: 300,
+      });
+    });
 
-      // Market size
+    // No typewriter on this beat — it's visual. Prompt to continue.
+    const prompt = this.track(
       this.add
-        .text(x + plotW / 2, y + 32, seg.marketSize2025, {
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          color: isAtlys ? '#bbffbb' : '#cccccc',
-          align: 'center',
+        .text(width / 2, height - 50, 'click to continue', {
+          fontFamily: FONT,
+          fontSize: '7px',
+          color: TEXT.MUTED,
         })
-        .setOrigin(0.5, 0);
+        .setOrigin(0.5)
+        .setAlpha(0),
+    );
 
-      // Top players (truncated)
-      const players = seg.topPlayers.slice(0, 2).join(', ');
-      this.add
-        .text(x + plotW / 2, y + 52, players, {
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          color: '#888888',
-          align: 'center',
-          wordWrap: { width: plotW - 16 },
-        })
-        .setOrigin(0.5, 0);
-
-      // Atlys badge
-      if (isAtlys) {
-        this.add
-          .text(x + plotW / 2, y + plotH - 16, '★ ATLYS', {
-            fontFamily: 'monospace',
-            fontSize: '12px',
-            color: '#22c55e',
-            fontStyle: 'bold',
-          })
-          .setOrigin(0.5, 0.5);
-      }
+    this.tweens.add({
+      targets: prompt,
+      alpha: 0.6,
+      delay: MARKET_SEGMENTS.length * 120 + 400,
+      duration: 500,
     });
   }
 
-  private renderTagline(width: number, height: number): void {
-    const y = height * 0.58;
+  // ── Beat 3: Atlys's slice ────────────────────────────────────
 
-    this.add
-      .text(width / 2, y, 'Atlys owns 1–2% of this pie. The other 98% is the journey.', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#aaaaaa',
+  private beat3_AtlysPie(width: number, height: number): void {
+    const tw = typeText(
+      this,
+      width / 2,
+      height / 2,
+      "Atlys owns 1-2% of this pie.\nThe other 98% is the journey.",
+      {
+        fontFamily: FONT,
+        fontSize: '10px',
+        color: TEXT.WHITE,
         align: 'center',
-      })
-      .setOrigin(0.5, 0);
-
-    this.add
-      .text(width / 2, y + 28, 'Choose your traveler:', {
-        fontFamily: 'monospace',
-        fontSize: '18px',
-        color: '#ffffff',
-        align: 'center',
-      })
-      .setOrigin(0.5, 0);
+        lineSpacing: 12,
+      },
+    );
+    tw.setOrigin(0.5);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
   }
 
-  private renderCharacterCards(width: number, height: number): void {
+  // ── Beat 4: Character select ─────────────────────────────────
+
+  private beat4_CharacterSelect(width: number, height: number): void {
+    this.characterSelectActive = true;
+
+    this.track(
+      this.add
+        .text(width / 2, 60, 'Pick your traveler.', {
+          fontFamily: FONT,
+          fontSize: '10px',
+          color: TEXT.WHITE,
+        })
+        .setOrigin(0.5, 0),
+    );
+
     const personas = Object.values(PERSONAS);
-    const cardW = 280;
-    const cardH = 100;
-    const gap = 16;
-    const totalW = personas.length * cardW + (personas.length - 1) * gap;
-    const startX = (width - totalW) / 2;
-    const y = height * 0.68;
+    const spacing = 260;
+    const totalW = (personas.length - 1) * spacing;
+    const startX = width / 2 - totalW / 2;
 
     personas.forEach((persona, i) => {
-      const x = startX + i * (cardW + gap);
+      const x = startX + i * spacing;
+      const y = height / 2 - 20;
 
-      // Card background
-      const card = this.add.rectangle(
-        x + cardW / 2,
-        y + cardH / 2,
-        cardW,
-        cardH,
-        0x1a1a2e,
-        0.9,
+      // Character sprite
+      const sprite = this.track(
+        this.add.image(x, y, `char_${persona.id}`).setScale(0.14),
       );
-      card.setStrokeStyle(2, 0x333355);
-      card.setInteractive({ useHandCursor: true });
+      sprite.setInteractive({ useHandCursor: true });
 
-      // Name
-      this.add
-        .text(x + cardW / 2, y + 14, persona.name, {
-          fontFamily: 'monospace',
-          fontSize: '16px',
-          color: '#ffffff',
-          fontStyle: 'bold',
-          align: 'center',
-        })
-        .setOrigin(0.5, 0);
+      // Name tag
+      this.track(
+        this.add
+          .text(x, y + 90, persona.name, {
+            fontFamily: FONT,
+            fontSize: '8px',
+            color: TEXT.WHITE,
+          })
+          .setOrigin(0.5, 0),
+      );
 
       // Subtitle
-      this.add
-        .text(x + cardW / 2, y + 36, persona.subtitle, {
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          color: '#888888',
-          align: 'center',
-          wordWrap: { width: cardW - 16 },
-        })
-        .setOrigin(0.5, 0);
+      this.track(
+        this.add
+          .text(x, y + 110, persona.subtitle, {
+            fontFamily: FONT,
+            fontSize: '6px',
+            color: TEXT.MUTED,
+            align: 'center',
+            wordWrap: { width: 220 },
+          })
+          .setOrigin(0.5, 0),
+      );
 
-      // One-liner (hidden by default, shown on hover)
-      const oneLiner = this.add
-        .text(x + cardW / 2, y + 56, `"${persona.oneLiner}"`, {
-          fontFamily: 'monospace',
-          fontSize: '9px',
-          color: '#cccccc',
-          align: 'center',
-          wordWrap: { width: cardW - 16 },
-        })
-        .setOrigin(0.5, 0)
-        .setAlpha(0);
+      // One-liner on hover
+      const oneLiner = this.track(
+        this.add
+          .text(x, y + 145, `"${persona.oneLiner}"`, {
+            fontFamily: FONT,
+            fontSize: '6px',
+            color: TEXT.SUB,
+            align: 'center',
+            wordWrap: { width: 230 },
+          })
+          .setOrigin(0.5, 0)
+          .setAlpha(0),
+      );
 
-      // Hover effects
-      card.on('pointerover', () => {
-        card.setStrokeStyle(2, ATLYS_GREEN);
+      sprite.on('pointerover', () => {
+        sprite.setScale(0.16);
         oneLiner.setAlpha(1);
       });
-      card.on('pointerout', () => {
-        card.setStrokeStyle(2, 0x333355);
+      sprite.on('pointerout', () => {
+        sprite.setScale(0.14);
         oneLiner.setAlpha(0);
       });
-
-      // Click to select
-      card.on('pointerdown', () => {
-        this.selectCharacter(persona.id);
+      sprite.on('pointerdown', () => {
+        this.selectCharacter(persona.id, persona.name);
       });
     });
   }
 
-  private selectCharacter(id: PersonaId): void {
+  private selectCharacter(id: PersonaId, name: string): void {
     this.registry.set('selectedPersona', id);
+    this.input.removeAllListeners();
+    this.input.keyboard?.removeAllListeners();
 
     const { width, height } = this.scale;
-    const name = PERSONAS[id].name;
-
     this.add
-      .text(width / 2, height - 30, `${name}'s journey begins...`, {
-        fontFamily: 'monospace',
-        fontSize: '20px',
-        color: '#22c55e',
-        align: 'center',
+      .text(width / 2, height - 40, `${name}'s journey begins...`, {
+        fontFamily: FONT,
+        fontSize: '9px',
+        color: TEXT.GREEN,
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5);
 
-    this.time.delayedCall(1500, () => {
+    this.time.delayedCall(1200, () => {
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start('DreamingScene');

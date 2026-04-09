@@ -1,13 +1,6 @@
 import Phaser from 'phaser';
 import { TAM } from '@/data/market';
-
-// Dawn sky gradient colors (top to bottom)
-const SKY_COLORS = [
-  0x0a0618, 0x0f0a24, 0x150e30, 0x1a0a2e, 0x221040,
-  0x2e1648, 0x3a1a4e, 0x4a1e4a, 0x5c2244, 0x6b2a42,
-  0x7a303e, 0x8b3a3a, 0x9c4836, 0xa85832, 0xb46830,
-  0xc07830, 0xc76b3a, 0xb08040, 0x605830, 0x1a1a0a,
-];
+import { FONT } from '@/ui/sceneConstants';
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -17,34 +10,41 @@ export class TitleScene extends Phaser.Scene {
   create(): void {
     try {
       const { width, height } = this.scale;
-      const stripH = height / SKY_COLORS.length;
 
-      // Dawn sky gradient
+      // Simple dark background with subtle pixel grid
       const gfx = this.add.graphics();
-      SKY_COLORS.forEach((color, i) => {
-        gfx.fillStyle(color, 1);
-        gfx.fillRect(0, i * stripH, width, stripH + 1);
-      });
+      gfx.fillStyle(0x0e0e1a, 1);
+      gfx.fillRect(0, 0, width, height);
 
-      // Stars in upper sky
-      for (let s = 0; s < 30; s++) {
+      // Subtle grid lines (LennyRPG-style)
+      gfx.lineStyle(1, 0x1a1a2e, 0.3);
+      for (let x = 0; x < width; x += 64) {
+        gfx.lineBetween(x, 0, x, height);
+      }
+      for (let y = 0; y < height; y += 64) {
+        gfx.lineBetween(0, y, width, y);
+      }
+
+      // A few scattered stars
+      for (let i = 0; i < 40; i++) {
         const sx = Phaser.Math.Between(0, width);
-        const sy = Phaser.Math.Between(0, height * 0.35);
-        const sa = Phaser.Math.FloatBetween(0.2, 0.7);
-        const sr = Phaser.Math.FloatBetween(1, 2.5);
+        const sy = Phaser.Math.Between(0, height);
+        const sa = Phaser.Math.FloatBetween(0.1, 0.4);
         gfx.fillStyle(0xffffff, sa);
-        gfx.fillCircle(sx, sy, sr);
+        gfx.fillCircle(sx, sy, 1.5);
       }
 
       // Character sprite
-      this.add.image(width * 0.72, height * 0.58, 'char_arjun').setScale(0.25);
+      this.add.image(width * 0.72, height * 0.55, 'char_arjun').setScale(0.25);
 
       // Title
       this.add
-        .text(width * 0.35, height * 0.28, 'Atlys Travel Experience', {
-          fontFamily: 'monospace',
-          fontSize: '42px',
+        .text(width * 0.35, height * 0.25, 'Atlys Travel\nExperience', {
+          fontFamily: FONT,
+          fontSize: '28px',
           color: '#ffffff',
+          align: 'center',
+          lineSpacing: 12,
         })
         .setOrigin(0.5);
 
@@ -52,11 +52,11 @@ export class TitleScene extends Phaser.Scene {
       this.add
         .text(
           width * 0.35,
-          height * 0.38,
-          `A journey through India's ${TAM.current} travel market`,
+          height * 0.42,
+          `India's ${TAM.current} travel market`,
           {
-            fontFamily: 'monospace',
-            fontSize: '16px',
+            fontFamily: FONT,
+            fontSize: '10px',
             color: '#aaaaaa',
           },
         )
@@ -64,9 +64,9 @@ export class TitleScene extends Phaser.Scene {
 
       // Start Journey CTA
       const cta = this.add
-        .text(width * 0.35, height * 0.53, '▶  Start Journey', {
-          fontFamily: 'monospace',
-          fontSize: '22px',
+        .text(width * 0.35, height * 0.55, 'Start Journey', {
+          fontFamily: FONT,
+          fontSize: '14px',
           color: '#22c55e',
         })
         .setOrigin(0.5)
@@ -88,8 +88,8 @@ export class TitleScene extends Phaser.Scene {
       const { width, height } = this.scale;
       this.add
         .text(width / 2, height / 2, 'Something went wrong.', {
-          fontFamily: 'monospace',
-          fontSize: '24px',
+          fontFamily: FONT,
+          fontSize: '12px',
           color: '#ff4444',
         })
         .setOrigin(0.5);

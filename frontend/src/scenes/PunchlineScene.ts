@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { PersonaId } from '../../../shared/types';
-import { FONT, TEXT } from '@/ui/sceneConstants';
+import { FONT, TEXT, drawPixelGrid } from '@/ui/sceneConstants';
 
 const LINES = [
   'The best travel tech is the tech you never have to search for.',
@@ -28,6 +28,8 @@ export class PunchlineScene extends Phaser.Scene {
       this.finished = false;
       this.lineTexts = [];
 
+      drawPixelGrid(this, width, height);
+
       // Character sprite
       const personaId = this.registry.get('selectedPersona') as PersonaId;
       if (personaId) {
@@ -46,7 +48,7 @@ export class PunchlineScene extends Phaser.Scene {
         const text = this.add
           .text(centerX, startY + i * spacing, line, {
             fontFamily: FONT,
-            fontSize: isLast ? '32px' : isPenultimate ? '26px' : '22px',
+            fontSize: isLast ? '18px' : isPenultimate ? '14px' : '11px',
             color: isLast ? '#22c55e' : TEXT.WHITE,
             fontStyle: isLast || isPenultimate ? 'bold' : 'normal',
             align: 'center',
@@ -83,7 +85,7 @@ export class PunchlineScene extends Phaser.Scene {
       this.add
         .text(width / 2, height / 2, 'Something went wrong.', {
           fontFamily: FONT,
-          fontSize: '24px',
+          fontSize: '12px',
           color: TEXT.RED,
         })
         .setOrigin(0.5);
@@ -129,7 +131,7 @@ export class PunchlineScene extends Phaser.Scene {
       this.add
         .text(width / 2, height / 2, 'Thank you.', {
           fontFamily: FONT,
-          fontSize: '28px',
+          fontSize: '14px',
           color: '#22c55e',
         })
         .setOrigin(0.5)

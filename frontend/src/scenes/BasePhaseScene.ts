@@ -1,420 +1,352 @@
 import Phaser from 'phaser';
 import { JourneyPhase, PersonaId } from '../../../shared/types';
 import { PERSONAS } from '@/data/personas';
-import { COLORS, TEXT, FONT } from '@/ui/sceneConstants';
+import {
+  COLORS,
+  TEXT,
+  FONT,
+  typeText,
+  drawPixelGrid,
+  TypewriterText,
+} from '@/ui/sceneConstants';
 
+/**
+ * Beat-based narration engine for the 5 journey phase scenes.
+ * Each phase plays as 6 narrative beats (from STORY.md Act 3):
+ *   0: Tagline (dramatic, full screen)
+ *   1: Standard World (competitors + what happens today)
+ *   2: Persona Anxiety (character's fear — thought bubble)
+ *   3: Hook (Atlys's unique angle — power-up)
+ *   4: Atlys Play (what Atlys does here)
+ *   5: Advance prompt → next scene
+ */
 export abstract class BasePhaseScene extends Phaser.Scene {
   protected abstract readonly nextScene: string;
   protected competitorColor: number = COLORS.COMPETITOR_GREY;
 
-  private currentStep = 0;
-  private stepObjects: Phaser.GameObjects.GameObject[] = [];
+  private currentBeat = 0;
+  private beatObjects: Phaser.GameObjects.GameObject[] = [];
   private phase!: JourneyPhase;
   private personaId!: PersonaId;
   private transitioning = false;
+  private activeTypewriter: TypewriterText | null = null;
 
   abstract getPhaseData(): JourneyPhase;
 
   create(): void {
     try {
       this.cameras.main.fadeIn(500, 0, 0, 0);
+      const { width, height } = this.scale;
       this.phase = this.getPhaseData();
       this.personaId = this.registry.get('selectedPersona') as PersonaId;
-      this.currentStep = 0;
-      this.stepObjects = [];
+      this.currentBeat = 0;
+      this.beatObjects = [];
       this.transitioning = false;
-      this.showCurrentStep();
+      this.activeTypewriter = null;
 
-      this.input.on('pointerdown', () => this.advanceStep());
-      this.input.keyboard?.on('keydown-SPACE', () => this.advanceStep());
+      // Persistent layer
+      drawPixelGrid(this, width, height);
+
+      // Show beat 0
+      this.showBeat();
+
+      this.input.on('pointerdown', () => this.handleClick());
+      this.input.keyboard?.on('keydown-SPACE', () => this.handleClick());
     } catch (error) {
       console.error(`${this.scene.key} failed to create:`, error);
       const { width, height } = this.scale;
       this.add
         .text(width / 2, height / 2, 'Something went wrong.', {
           fontFamily: FONT,
-          fontSize: '24px',
+          fontSize: '10px',
           color: TEXT.RED,
         })
         .setOrigin(0.5);
     }
   }
 
-  private advanceStep(): void {
+  private handleClick(): void {
     if (this.transitioning) return;
-    this.currentStep++;
-    if (this.currentStep > 3) {
+
+    // If typewriter is active, skip to end of current text
+    if (this.activeTypewriter?.skipTyping()) return;
+
+    // Otherwise advance to next beat
+    this.currentBeat++;
+    if (this.currentBeat > 5) {
       this.transitioning = true;
       this.transitionToNext();
       return;
     }
-    this.clearStep();
-    this.showCurrentStep();
+    this.clearBeat();
+    this.showBeat();
   }
 
-  private clearStep(): void {
-    this.stepObjects.forEach((obj) => obj.destroy());
-    this.stepObjects = [];
+  private clearBeat(): void {
+    this.activeTypewriter = null;
+    this.beatObjects.forEach((obj) => obj.destroy());
+    this.beatObjects = [];
   }
 
   private track<T extends Phaser.GameObjects.GameObject>(obj: T): T {
-    this.stepObjects.push(obj);
+    this.beatObjects.push(obj);
     return obj;
   }
 
-  private showCurrentStep(): void {
+  private showBeat(): void {
     const { width, height } = this.scale;
-    switch (this.currentStep) {
-      case 0:
-        this.renderTagline(width, height);
-        break;
-      case 1:
-        this.renderCompetitorsAndAnxiety(width, height);
-        break;
-      case 2:
-        this.renderHookAndPlay(width, height);
-        break;
-      case 3:
-        this.renderAdditionalHooks(width, height);
-        break;
+    switch (this.currentBeat) {
+      case 0: this.beatTagline(width, height); break;
+      case 1: this.beatStandardWorld(width, height); break;
+      case 2: this.beatPersonaAnxiety(width, height); break;
+      case 3: this.beatHook(width, height); break;
+      case 4: this.beatAtlysPlay(width, height); break;
+      case 5: this.beatAdvance(width, height); break;
     }
   }
 
-  // ── Step 0: Full-screen tagline ──────────────────────────────
+  // ── Beat 0: Tagline ──────────────────────────────────────────
 
-  private renderTagline(width: number, height: number): void {
+  private beatTagline(width: number, height: number): void {
     this.track(
       this.add
-        .text(width / 2, height / 2 - 80, `${this.phase.emoji} ${this.phase.title}`, {
+        .text(width / 2, height / 2 - 50, `${this.phase.emoji} ${this.phase.title}`, {
           fontFamily: FONT,
-          fontSize: '20px',
+          fontSize: '10px',
           color: TEXT.SUB,
         })
         .setOrigin(0.5),
     );
 
-    const tagline = this.track(
-      this.add
-        .text(width / 2, height / 2, this.phase.sceneTagline, {
-          fontFamily: FONT,
-          fontSize: '26px',
-          color: TEXT.WHITE,
-          align: 'center',
-          wordWrap: { width: 1000 },
-        })
-        .setOrigin(0.5)
-        .setAlpha(0),
+    const tw = typeText(
+      this,
+      width / 2,
+      height / 2,
+      this.phase.sceneTagline,
+      {
+        fontFamily: FONT,
+        fontSize: '12px',
+        color: TEXT.WHITE,
+        align: 'center',
+        wordWrap: { width: 900 },
+      },
     );
-
-    this.tweens.add({ targets: tagline, alpha: 1, duration: 800 });
-
-    const prompt = this.track(
-      this.add
-        .text(width / 2, height - 60, 'Click to continue', {
-          fontFamily: FONT,
-          fontSize: '14px',
-          color: TEXT.MUTED,
-        })
-        .setOrigin(0.5),
-    );
-
-    this.tweens.add({
-      targets: prompt,
-      alpha: { from: 0.3, to: 1 },
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-    });
+    tw.setOrigin(0.5);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
   }
 
-  // ── Step 1: Competitors + Persona anxiety ────────────────────
+  // ── Beat 1: Standard World ───────────────────────────────────
 
-  private renderCompetitorsAndAnxiety(width: number, height: number): void {
-    // Phase title
+  private beatStandardWorld(width: number, height: number): void {
+    // Phase header
     this.track(
       this.add
         .text(width / 2, 20, `${this.phase.emoji} ${this.phase.title}`, {
           fontFamily: FONT,
-          fontSize: '18px',
+          fontSize: '10px',
           color: TEXT.WHITE,
         })
         .setOrigin(0.5, 0),
     );
 
-    this.track(
-      this.add
-        .text(width / 2, 48, 'What happens today:', {
-          fontFamily: FONT,
-          fontSize: '14px',
-          color: TEXT.SUB,
-        })
-        .setOrigin(0.5, 0),
-    );
-
-    // Competitor rectangles
+    // Competitor names as grey labels
     const competitors = this.phase.competitorNames;
-    const maxPerRow = 4;
-    const rectW = 155;
-    const rectH = 46;
-    const gap = 16;
-    const rows = Math.ceil(competitors.length / maxPerRow);
-
-    for (let i = 0; i < competitors.length; i++) {
-      const row = Math.floor(i / maxPerRow);
-      const colCount = Math.min(maxPerRow, competitors.length - row * maxPerRow);
-      const col = i % maxPerRow;
-      const totalRowW = colCount * rectW + (colCount - 1) * gap;
-      const startX = (width - totalRowW) / 2;
-      const x = startX + col * (rectW + gap) + rectW / 2;
-      const y = 95 + row * 62;
-
-      this.track(
-        this.add
-          .rectangle(x, y, rectW, rectH, this.competitorColor, 0.8)
-          .setStrokeStyle(1, 0x555555),
-      );
-
-      this.track(
-        this.add
-          .text(x, y, competitors[i], {
-            fontFamily: FONT,
-            fontSize: '11px',
-            color: '#888888',
-            align: 'center',
-            wordWrap: { width: rectW - 10 },
-          })
-          .setOrigin(0.5),
-      );
-    }
-
-    // Standard focus
-    const focusY = 95 + rows * 62 + 8;
+    const labelY = 55;
+    const label = competitors.join('  ·  ');
     this.track(
       this.add
-        .text(width / 2, focusY, this.phase.standardFocus, {
+        .text(width / 2, labelY, label, {
           fontFamily: FONT,
-          fontSize: '11px',
-          color: TEXT.SUB,
-          align: 'center',
-          wordWrap: { width: 900 },
+          fontSize: '7px',
+          color: '#666666',
         })
         .setOrigin(0.5, 0),
     );
 
     // Character sprite
     const spriteKey = `char_${this.personaId}`;
-    this.track(this.add.image(90, height - 100, spriteKey).setScale(0.12));
+    this.track(this.add.image(100, height - 100, spriteKey).setScale(0.12));
 
-    // Persona anxiety card
-    const persona = PERSONAS[this.personaId];
-    const anxiety = this.phase.personaAnxieties[this.personaId];
-    const cardW = 820;
-    const cardH = 120;
-    const cardX = width / 2 + 30;
-    const cardY = height - 90;
-
-    this.track(
-      this.add
-        .rectangle(cardX, cardY, cardW, cardH, COLORS.RED_CARD_BG, 0.95)
-        .setStrokeStyle(2, COLORS.DANGER_RED),
-    );
-
-    this.track(
-      this.add.text(cardX - cardW / 2 + 16, cardY - cardH / 2 + 10, `💭 ${persona.name}'s fear:`, {
-        fontFamily: FONT,
-        fontSize: '12px',
-        color: TEXT.RED,
-      }),
-    );
-
-    this.track(
-      this.add
-        .text(cardX, cardY + 8, anxiety, {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: TEXT.WHITE,
-          align: 'center',
-          wordWrap: { width: cardW - 40 },
-        })
-        .setOrigin(0.5, 0),
-    );
+    // Narrate standardFocus (first 2 sentences)
+    const focus = this.firstSentences(this.phase.standardFocus, 2);
+    const tw = typeText(this, width / 2, height / 2 - 30, focus, {
+      fontFamily: FONT,
+      fontSize: '8px',
+      color: TEXT.SUB,
+      align: 'center',
+      wordWrap: { width: 800 },
+    });
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
   }
 
-  // ── Step 2: Hook power-up + Atlys play ───────────────────────
+  // ── Beat 2: Persona Anxiety ──────────────────────────────────
 
-  private renderHookAndPlay(width: number, height: number): void {
-    // Phase title
+  private beatPersonaAnxiety(width: number, height: number): void {
+    const persona = PERSONAS[this.personaId];
+    const anxiety = this.phase.personaAnxieties[this.personaId];
+
+    // Phase header
     this.track(
       this.add
         .text(width / 2, 20, `${this.phase.emoji} ${this.phase.title}`, {
           fontFamily: FONT,
-          fontSize: '18px',
+          fontSize: '10px',
           color: TEXT.WHITE,
         })
         .setOrigin(0.5, 0),
     );
 
-    // Green hook card
-    const hookW = 700;
-    const hookH = 110;
-    const hookY = 110;
+    // Character sprite (larger, centered)
+    const spriteKey = `char_${this.personaId}`;
+    this.track(this.add.image(width / 2, height / 2 + 80, spriteKey).setScale(0.18));
 
-    const hookCard = this.track(
+    // Thought bubble indicator
+    this.track(
       this.add
-        .rectangle(width / 2, hookY, hookW, hookH, COLORS.GREEN_CARD_BG, 0.95)
-        .setStrokeStyle(2, COLORS.ATLYS_GREEN),
+        .text(width / 2, height / 2 - 100, `💭 ${persona.name}`, {
+          fontFamily: FONT,
+          fontSize: '9px',
+          color: TEXT.RED,
+        })
+        .setOrigin(0.5),
+    );
+
+    // Anxiety narration (red text, types in)
+    const tw = typeText(this, width / 2, height / 2 - 70, anxiety, {
+      fontFamily: FONT,
+      fontSize: '8px',
+      color: '#ff8888',
+      align: 'center',
+      wordWrap: { width: 800 },
+    });
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
+  }
+
+  // ── Beat 3: Hook ─────────────────────────────────────────────
+
+  private beatHook(width: number, height: number): void {
+    // Phase header
+    this.track(
+      this.add
+        .text(width / 2, 20, `${this.phase.emoji} ${this.phase.title}`, {
+          fontFamily: FONT,
+          fontSize: '10px',
+          color: TEXT.WHITE,
+        })
+        .setOrigin(0.5, 0),
+    );
+
+    // Power-up label (green, glowing)
+    const hookLabel = this.track(
+      this.add
+        .text(width / 2, height / 2 - 80, `⚡ ${this.phase.hookName}`, {
+          fontFamily: FONT,
+          fontSize: '11px',
+          color: TEXT.GREEN,
+        })
+        .setOrigin(0.5),
     );
 
     this.tweens.add({
-      targets: hookCard,
-      alpha: { from: 0.8, to: 1 },
+      targets: hookLabel,
+      alpha: { from: 0.6, to: 1 },
       duration: 600,
       yoyo: true,
       repeat: -1,
     });
 
-    this.track(
-      this.add
-        .text(width / 2, hookY - 28, `⚡ ${this.phase.hookName}`, {
-          fontFamily: FONT,
-          fontSize: '18px',
-          color: TEXT.GREEN,
-          fontStyle: 'bold',
-        })
-        .setOrigin(0.5),
-    );
-
-    this.track(
-      this.add
-        .text(width / 2, hookY + 4, this.phase.hookQuote, {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: '#cccccc',
-          align: 'center',
-          wordWrap: { width: hookW - 40 },
-        })
-        .setOrigin(0.5, 0),
-    );
-
-    // Atlys play card
-    const playW = 1000;
-    const playH = 340;
-    const playY = 400;
-
-    this.track(
-      this.add
-        .rectangle(width / 2, playY, playW, playH, COLORS.PLAY_CARD_BG, 0.9)
-        .setStrokeStyle(1, COLORS.ATLYS_GREEN),
-    );
-
-    this.track(
-      this.add
-        .text(width / 2 - playW / 2 + 20, playY - playH / 2 + 12, 'Atlys Play', {
-          fontFamily: FONT,
-          fontSize: '16px',
-          color: TEXT.GREEN,
-        }),
-    );
-
-    this.track(
-      this.add
-        .text(width / 2 - playW / 2 + 20, playY - playH / 2 + 40, this.phase.atlysPlay, {
-          fontFamily: FONT,
-          fontSize: '12px',
-          color: '#dddddd',
-          wordWrap: { width: playW - 40 },
-          lineSpacing: 4,
-        }),
-    );
-
-    // Prompt
-    const prompt = this.track(
-      this.add
-        .text(width / 2, height - 40, 'Click to continue', {
-          fontFamily: FONT,
-          fontSize: '14px',
-          color: TEXT.MUTED,
-        })
-        .setOrigin(0.5),
-    );
-
-    this.tweens.add({
-      targets: prompt,
-      alpha: { from: 0.3, to: 1 },
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
+    // Hook quote narration
+    const tw = typeText(this, width / 2, height / 2 - 30, this.phase.hookQuote, {
+      fontFamily: FONT,
+      fontSize: '8px',
+      color: '#cccccc',
+      align: 'center',
+      wordWrap: { width: 800 },
     });
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
   }
 
-  // ── Step 3: Additional hooks + advance ───────────────────────
+  // ── Beat 4: Atlys Play ──────────────────────────────────────
 
-  private renderAdditionalHooks(width: number, height: number): void {
-    // Phase title
+  private beatAtlysPlay(width: number, height: number): void {
+    // Phase header
     this.track(
       this.add
         .text(width / 2, 20, `${this.phase.emoji} ${this.phase.title}`, {
           fontFamily: FONT,
-          fontSize: '18px',
+          fontSize: '10px',
           color: TEXT.WHITE,
         })
         .setOrigin(0.5, 0),
     );
 
+    // "Atlys Play" label
     this.track(
       this.add
-        .text(width / 2, 55, 'Additional Hooks', {
+        .text(width / 2, 60, 'Atlys Play', {
           fontFamily: FONT,
-          fontSize: '20px',
+          fontSize: '10px',
+          color: TEXT.GREEN,
+        })
+        .setOrigin(0.5, 0),
+    );
+
+    // Atlys play narration (first 3 sentences, green-tinted)
+    const play = this.firstSentences(this.phase.atlysPlay, 3);
+    const tw = typeText(this, width / 2, 110, play, {
+      fontFamily: FONT,
+      fontSize: '8px',
+      color: '#aaffaa',
+      wordWrap: { width: 900 },
+    });
+    tw.setOrigin(0.5, 0);
+    this.track(tw);
+    this.activeTypewriter = tw as TypewriterText;
+  }
+
+  // ── Beat 5: Advance ─────────────────────────────────────────
+
+  private beatAdvance(width: number, height: number): void {
+    // Phase header
+    this.track(
+      this.add
+        .text(width / 2, 20, `${this.phase.emoji} ${this.phase.title}`, {
+          fontFamily: FONT,
+          fontSize: '10px',
           color: TEXT.WHITE,
         })
         .setOrigin(0.5, 0),
     );
 
+    // Additional hook names as badges
     const hooks = this.phase.additionalHooks ?? [];
     if (hooks.length > 0) {
-      const cardW = Math.min(290, (width - 60 - (hooks.length - 1) * 14) / hooks.length);
-      const cardH = 180;
-      const gap = 14;
-      const totalW = hooks.length * cardW + (hooks.length - 1) * gap;
-      const startX = (width - totalW) / 2;
+      this.track(
+        this.add
+          .text(width / 2, height / 2 - 80, 'Additional Hooks', {
+            fontFamily: FONT,
+            fontSize: '8px',
+            color: TEXT.SUB,
+          })
+          .setOrigin(0.5),
+      );
 
       hooks.forEach((hook, i) => {
-        const x = startX + i * (cardW + gap) + cardW / 2;
-        const y = 200;
-
-        this.track(
-          this.add
-            .rectangle(x, y, cardW, cardH, COLORS.CARD_BG, 0.8)
-            .setStrokeStyle(1, COLORS.ATLYS_GREEN),
-        );
-
-        // Extract hook name (text before first colon)
         const colonIdx = hook.indexOf(':');
-        const hookName = colonIdx > -1 ? hook.substring(0, colonIdx) : hook.substring(0, 30);
-        const hookDesc =
-          colonIdx > -1 ? hook.substring(colonIdx + 1).trim() : hook.substring(30);
-
+        const name = colonIdx > -1 ? hook.substring(0, colonIdx) : hook.substring(0, 30);
         this.track(
           this.add
-            .text(x, y - cardH / 2 + 12, hookName, {
+            .text(width / 2, height / 2 - 40 + i * 28, `· ${name}`, {
               fontFamily: FONT,
-              fontSize: '12px',
+              fontSize: '7px',
               color: TEXT.GREEN,
-              fontStyle: 'bold',
-              align: 'center',
-              wordWrap: { width: cardW - 20 },
-            })
-            .setOrigin(0.5, 0),
-        );
-
-        this.track(
-          this.add
-            .text(x, y - cardH / 2 + 36, hookDesc, {
-              fontFamily: FONT,
-              fontSize: '10px',
-              color: TEXT.SUB,
-              wordWrap: { width: cardW - 20 },
             })
             .setOrigin(0.5, 0),
         );
@@ -425,9 +357,9 @@ export abstract class BasePhaseScene extends Phaser.Scene {
     const nextLabel = this.nextScene.replace('Scene', '').replace(/([A-Z])/g, ' $1').trim();
     const prompt = this.track(
       this.add
-        .text(width / 2, height - 50, `→ Next: ${nextLabel}`, {
+        .text(width / 2, height - 60, `→ ${nextLabel}`, {
           fontFamily: FONT,
-          fontSize: '16px',
+          fontSize: '9px',
           color: TEXT.GREEN,
         })
         .setOrigin(0.5),
@@ -442,7 +374,12 @@ export abstract class BasePhaseScene extends Phaser.Scene {
     });
   }
 
-  // ── Transition ───────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────
+
+  private firstSentences(text: string, count: number): string {
+    const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [text];
+    return sentences.slice(0, count).join(' ').trim();
+  }
 
   private transitionToNext(): void {
     this.input.removeAllListeners();
