@@ -13,7 +13,7 @@ import {
   slideCharacter,
   exitRight,
 } from '@/ui/sceneConstants';
-import { drawGarden } from '@/ui/backgrounds';
+import { drawSceneBackground } from '@/ui/backgrounds';
 
 /**
  * MarketScene — "The Market Nobody Sees Whole" (STORY.md Act 1)
@@ -46,7 +46,7 @@ export class MarketScene extends Phaser.Scene {
       this.activeTypewriter = null;
       this.characterSelectActive = false;
 
-      drawGarden(this);
+      drawSceneBackground(this, this.scene.key);
       addRestartButton(this);
 
       this.showBeat();

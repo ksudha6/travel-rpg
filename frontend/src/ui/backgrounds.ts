@@ -288,6 +288,101 @@ export function drawPhaseBackground(scene: Phaser.Scene): void {
   gfx.fillRect(0, GROUND, W, 3);
 }
 
+// ── Image-based backgrounds ──────────────────────────────
+// Use DALL-E generated PNGs (loaded in PreloadScene) scaled to fill canvas.
+
+function drawImageBg(scene: Phaser.Scene, key: string): void {
+  const img = scene.add.image(W / 2, H / 2, key);
+  img.setDisplaySize(W, H);
+  img.setDepth(-1);
+}
+
+// ── World Map ────────────────────────────────────────────
+// Used by: MarketScene
+// Dark ocean, simplified continent shapes, flight arcs from India.
+
+export function drawWorldMap(scene: Phaser.Scene): void {
+  const gfx = scene.add.graphics();
+
+  // Deep ocean
+  gfx.fillStyle(0x0a0e1a, 1);
+  gfx.fillRect(0, 0, W, H);
+
+  // Subtle grid (longitude/latitude lines)
+  gfx.lineStyle(1, 0x141830, 0.4);
+  for (let x = 0; x < W; x += 80) {
+    gfx.lineBetween(x, 0, x, H);
+  }
+  for (let y = 0; y < H; y += 80) {
+    gfx.lineBetween(0, y, W, y);
+  }
+
+  // Simplified continent silhouettes (low-poly fills)
+  gfx.fillStyle(0x1a2a1a, 0.5);
+
+  // Europe
+  gfx.fillRect(500, 80, 160, 100);
+  gfx.fillRect(520, 60, 80, 30);
+
+  // Africa
+  gfx.fillRect(520, 200, 120, 200);
+  gfx.fillRect(540, 180, 80, 30);
+
+  // India (highlighted slightly brighter)
+  gfx.fillStyle(0x2a4a2a, 0.7);
+  gfx.fillRect(720, 180, 60, 100);
+  gfx.fillRect(700, 160, 80, 30);
+
+  // Southeast Asia
+  gfx.fillStyle(0x1a2a1a, 0.5);
+  gfx.fillRect(820, 200, 100, 80);
+  gfx.fillRect(850, 280, 60, 60);
+
+  // East Asia
+  gfx.fillRect(860, 100, 120, 100);
+
+  // Americas (left side)
+  gfx.fillRect(60, 80, 100, 140);
+  gfx.fillRect(80, 220, 80, 200);
+  gfx.fillRect(120, 300, 60, 120);
+
+  // Australia
+  gfx.fillRect(900, 380, 100, 70);
+
+  // India marker (glowing dot)
+  gfx.fillStyle(0x22c55e, 0.8);
+  gfx.fillCircle(740, 210, 5);
+
+  // Flight route arcs from India to various regions
+  gfx.lineStyle(1, 0x22c55e, 0.15);
+  const indiaX = 740;
+  const indiaY = 210;
+  const destinations = [
+    { x: 560, y: 120 },  // Europe
+    { x: 560, y: 300 },  // Africa
+    { x: 860, y: 250 },  // SE Asia
+    { x: 900, y: 150 },  // East Asia
+    { x: 140, y: 150 },  // North America
+    { x: 940, y: 400 },  // Australia
+  ];
+
+  destinations.forEach((dest) => {
+    // Draw curved arc (quadratic bezier approximation with line segments)
+    const midX = (indiaX + dest.x) / 2;
+    const midY = Math.min(indiaY, dest.y) - 60;
+    const steps = 20;
+    for (let i = 0; i < steps; i++) {
+      const t1 = i / steps;
+      const t2 = (i + 1) / steps;
+      const x1 = (1 - t1) * (1 - t1) * indiaX + 2 * (1 - t1) * t1 * midX + t1 * t1 * dest.x;
+      const y1 = (1 - t1) * (1 - t1) * indiaY + 2 * (1 - t1) * t1 * midY + t1 * t1 * dest.y;
+      const x2 = (1 - t2) * (1 - t2) * indiaX + 2 * (1 - t2) * t2 * midX + t2 * t2 * dest.x;
+      const y2 = (1 - t2) * (1 - t2) * indiaY + 2 * (1 - t2) * t2 * midY + t2 * t2 * dest.y;
+      gfx.lineBetween(x1, y1, x2, y2);
+    }
+  });
+}
+
 // ── Scene-to-background mapping ───────────────────────────
 
 export function drawSceneBackground(scene: Phaser.Scene, sceneName: string): void {
@@ -296,25 +391,28 @@ export function drawSceneBackground(scene: Phaser.Scene, sceneName: string): voi
       drawAirportTerminal(scene);
       break;
     case 'MarketScene':
-      drawGarden(scene);
+      drawWorldMap(scene);
+      break;
+    case 'PunchlineScene':
+      drawImageBg(scene, 'bg_garden');
       break;
     case 'DreamingScene':
     case 'PreDepartureScene':
     case 'InTransitScene':
     case 'OnGroundScene':
     case 'PostTripScene':
-      drawPhaseBackground(scene);
+      drawImageBg(scene, 'bg_phase');
+      break;
+    case 'JourneyMapScene':
+      drawImageBg(scene, 'bg_journey_map');
       break;
     case 'HypothesesScene':
     case 'CompetitiveScene':
     case 'GTMScene':
       drawBoardroom(scene);
       break;
-    case 'PunchlineScene':
-      drawGarden(scene);
-      break;
     default:
-      drawGarden(scene);
+      drawImageBg(scene, 'bg_phase');
       break;
   }
 }

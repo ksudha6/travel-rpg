@@ -50,21 +50,19 @@ export class JourneyMapScene extends Phaser.Scene {
       const persona = PERSONAS[personaId];
       const phase = JOURNEY_PHASES.find((p) => p.id === PHASE_IDS[phaseIndex])!;
 
-      // Dark background
-      const gfx = this.add.graphics();
-      gfx.fillStyle(0x0e0e1a, 1);
-      gfx.fillRect(0, 0, width, height);
+      // Journey map background image
+      const bgImg = this.add.image(width / 2, height / 2, 'bg_journey_map');
+      bgImg.setDisplaySize(width, height);
+      bgImg.setDepth(-1);
 
       addRestartButton(this);
 
-      // Ground line
       const groundY = height * ANCHOR.GROUND_Y;
-      gfx.fillStyle(0x2a2a3a, 1);
-      gfx.fillRect(0, groundY, width, height - groundY);
 
-      // Path line
+      // Path line overlay (subtle, on top of the background image)
+      const gfx = this.add.graphics();
       const pathY = groundY - 4;
-      gfx.fillStyle(0x3a3a5a, 1);
+      gfx.fillStyle(0xffffff, 0.08);
       gfx.fillRect(60, pathY, width - 120, 4);
 
       // Landmark positions (evenly spaced)

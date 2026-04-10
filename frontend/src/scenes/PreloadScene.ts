@@ -25,7 +25,12 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('char_meera', 'assets/characters/meera-family.png');
     this.load.image('char_savi', 'assets/characters/savi.png');
 
-    // Music (CC0 — "Perilous Dungeon" by HydroGene, opengameart.org)
+    // Backgrounds
+    this.load.image('bg_garden', 'assets/backgrounds/garden.png');
+    this.load.image('bg_journey_map', 'assets/backgrounds/journey-map.png');
+    this.load.image('bg_phase', 'assets/backgrounds/phase.png');
+
+    // Music (CC0 — "Oceanside" lofi, opengameart.org)
     this.load.audio('bgm', 'assets/audio/bgm.mp3');
   }
 
